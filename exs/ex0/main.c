@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define MACHINE_DEFAULT_PROBABILITY 5
+
 /* Structs */
 
 typedef struct teddy_machine {
@@ -13,13 +15,136 @@ typedef struct teddy_machine {
 
 /* List functions */
 
-teddy_machine* create_list (unsigned int machines){ /* INSTRUÇÃO: Implemente a função */ }
+teddy_machine* create_machine(unsigned int id, teddy_machine* previous, teddy_machine* next)
+{
+    teddy_machine *mach;
 
-teddy_machine* select_machine (teddy_machine *list, unsigned int place){ /* INSTRUÇÃO: Implemente a função */ }
+    if ( !(mach = malloc(sizeof(teddy_machine))) )
+        return NULL;
 
-teddy_machine* remove_machine (teddy_machine *list, teddy_machine *remove) { /* INSTRUÇÃO: Implemente a função */ }
+    mach->id = id;
+    mach->probability = MACHINE_DEFAULT_PROBABILITY;
+    mach->next = next;
+    mach->previous = previous;
 
-void destroy_list (teddy_machine *list){/* INSTRUÇÃO: Implemente a função */ }
+    return mach;
+}
+
+void destroy_machine(teddy_machine** pmach)
+{
+    teddy_machine *mach_next, *mach_previous;
+
+    if ( !pmach || !(*pmach) )
+        return;
+
+    mach_next = (*pmach)->next;
+    mach_previous = (*pmach)->previous;
+
+    if (mach_next)
+        mach_next->previous = mach_previous;
+
+    if (mach_previous)
+        mach_previous->next = mach_next;
+
+    free(*pmach);
+    *pmach = NULL;
+
+    return;
+}
+
+void destroy_list(teddy_machine *list)
+{
+    teddy_machine *current, *next;
+
+    if (!list)
+        return;
+
+    current = list;
+    next = list->next;
+
+    while (current != next) {
+        destroy_machine(&current);
+        current = next;
+
+        if (next)
+            next = next->next;
+    }
+
+    destroy_machine(&current);
+
+    return;
+}
+
+teddy_machine* create_list(unsigned int machines)
+{
+    teddy_machine *list, *mach;
+
+    if (machines < 1)
+        return NULL;
+
+    if ( !(list = create_machine(1, NULL, NULL)) )
+        return NULL;
+
+    list->previous = list->next = list;
+
+    for (int id = 2; id <= machines; id++) {
+        if ( !(mach = create_machine(id, list->previous, list)) ) {
+            destroy_list(list);
+            return NULL;
+        }
+
+        list->previous = mach->previous->next = mach;
+    }
+
+    return list;
+}
+
+teddy_machine* select_machine(teddy_machine *list, unsigned int place)
+{
+    int meio;
+    teddy_machine *selected;
+
+    if (!list)
+        return NULL;
+
+    meio = 0;
+
+    if (list->previous)
+        meio = (list->previous->id) / 2;
+
+    selected = list;
+
+    // escolha o caminho mais curto
+    if (place < meio) {
+
+        while (selected->id != place) {
+
+            selected = selected->next;
+
+            if (!selected)
+                return NULL;
+        }
+
+    } else {
+
+        while (selected->id != place) {
+
+            selected = selected->previous;
+
+            if (!selected)
+                return NULL;
+        }
+    }
+
+    return selected;
+}
+
+// remover sem destruir?
+teddy_machine* remove_machine(teddy_machine *list, teddy_machine *remove)
+{
+    destroy_machine(&remove);
+    return NULL;
+}
 
 /* Randomization functions */
 
