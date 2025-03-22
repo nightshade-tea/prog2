@@ -135,7 +135,7 @@ int main(void)
         case '3':
             goto exit;
         default:
-            printf("Opção inválida!\n");
+            printf("\nOpção inválida!\n\n");
             break;
         }
     } while (1);
