@@ -107,6 +107,14 @@ int fn_remove(fn_fila *fila, char *titulo, char *texto)
     return 0;
 }
 
+int fn_vazia(fn_fila *fila)
+{
+    if (!fila)
+        return -1;
+
+    return !(fila->prim);
+}
+
 void fn_destroi(fn_fila **fila)
 {
     fn_nodo *nodo, *prox;

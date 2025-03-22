@@ -1,10 +1,13 @@
 #ifndef FILA_NOTICIAS_H
 #define FILA_NOTICIAS_H
 
+#define FN_TAM_TITULO 33
+#define FN_TAM_TEXTO  513
+
 typedef struct _fn_noticia {
 
-    char titulo[33];
-    char texto[513];
+    char titulo[FN_TAM_TITULO];
+    char texto[FN_TAM_TEXTO];
     unsigned char idade;
 
 } fn_noticia;
@@ -30,6 +33,8 @@ fn_nodo *fn_insere(fn_fila *fila, const char *titulo, const char *texto);
 void fn_atualiza(fn_fila *fila);
 
 int fn_remove(fn_fila *fila, char *titulo, char *texto);
+
+int fn_vazia(fn_fila *fila);
 
 void fn_destroi(fn_fila **fila);
 
