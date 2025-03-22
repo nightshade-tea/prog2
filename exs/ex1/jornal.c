@@ -58,12 +58,9 @@ static void cadastrar_noticia(fn_fila *fn)
     return;
 }
 
-static void imprime_edicao(char **titulo, char **texto)
+static void imprime_edicao(char titulo[2][FN_TAM_TITULO], char texto[2][FN_TAM_TEXTO])
 {
     if ( !titulo || !texto )
-        return;
-
-    if ( !(titulo[0]) || !(texto[0]) || !(titulo[1]) || !(texto[1]))
         return;
 
     printf("\n=======================================================\n");
@@ -92,12 +89,15 @@ static void fechar_edicao(fn_fila *breakn, fn_fila *infs)
     for ( ; i < 2 && !fn_vazia(infs); i++)
         fn_remove(infs, titulo[i], texto[i]);
 
+    fn_atualiza(breakn);
+    fn_atualiza(infs);
+
     if (i < 2) {
         printf("Esta edição foi pulada por falta de notícias!\n");
         return;
     }
 
-    imprime_edicao((char**)titulo, (char**)texto);
+    imprime_edicao(titulo, texto);
 
     return;
 }
