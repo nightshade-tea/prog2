@@ -32,6 +32,8 @@ fn_nodo *fn_insere(fn_fila *fila, const char *titulo, const char *texto);
 
 void fn_atualiza(fn_fila *fila);
 
+int fn_qte_noticias_validas(fn_fila *fila);
+
 int fn_remove(fn_fila *fila, char *titulo, char *texto);
 
 int fn_vazia(fn_fila *fila);

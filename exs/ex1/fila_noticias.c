@@ -76,6 +76,27 @@ void fn_atualiza(fn_fila *fila)
     return;
 }
 
+int fn_qte_noticias_validas(fn_fila *fila)
+{
+    fn_nodo *nodo;
+    int qte;
+
+    if (!fila)
+        return -1;
+
+    nodo = fila->prim;
+    qte = 0;
+
+    while (nodo) {
+        if (nodo->noticia.idade <= 3)
+            qte++;
+
+        nodo = nodo->prox;
+    }
+
+    return qte;
+}
+
 int fn_remove(fn_fila *fila, char *titulo, char *texto)
 {
     fn_nodo *nodo, *prox;
