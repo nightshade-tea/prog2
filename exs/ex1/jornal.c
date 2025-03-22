@@ -11,9 +11,8 @@ static char menu()
     printf("> ");
     fflush(stdout);
 
-    opcao = getchar();
-
-    while (getchar() != '\n');
+    if ( (opcao = getchar()) != '\n' )
+        while (getchar() != '\n');
 
     return opcao;
 }
@@ -26,8 +25,8 @@ static unsigned char prioridade()
     printf("Breaking news? [s/N] ");
     fflush(stdout);
 
-    opcao = getchar();
-    while (getchar() != '\n');
+    if ( (opcao = getchar()) != '\n' )
+        while (getchar() != '\n');
 
     switch (opcao) {
     case 's':
@@ -64,12 +63,16 @@ static void imprime_edicao(char titulo[2][FN_TAM_TITULO], char texto[2][FN_TAM_T
         return;
 
     printf("\n=======================================================\n");
-    printf("\n%s\n", titulo[0]);
-    printf("\n%s\n", texto[0]);
-    printf("\n==\n");
-    printf("\n%s\n", titulo[1]);
-    printf("\n%s\n", texto[1]);
-    printf("\n=======================================================\n");
+    printf("\n%s", titulo[0]);
+    printf("\n%s", texto[0]);
+    
+    if ( titulo[1][0] && texto[1][0] ) {
+        printf("\n==\n");
+        printf("\n%s", titulo[1]);
+        printf("\n%s", texto[1]);
+    }
+
+    printf("\n=======================================================\n\n");
 
     return;
 }
@@ -83,21 +86,25 @@ static void fechar_edicao(fn_fila *breakn, fn_fila *infs)
     if ( !breakn || !infs )
         return;
 
+    if ( (fn_qte_noticias_validas(breakn) + fn_qte_noticias_validas(infs)) < 1 ) {
+        printf("\nEsta edição foi pulada por falta de notícias!\n\n");
+        goto exit;
+    }
+
     for (i = 0; i < 2 && !fn_vazia(breakn); i++)
         fn_remove(breakn, titulo[i], texto[i]);
 
     for ( ; i < 2 && !fn_vazia(infs); i++)
         fn_remove(infs, titulo[i], texto[i]);
 
-    fn_atualiza(breakn);
-    fn_atualiza(infs);
-
-    if (i < 2) {
-        printf("Esta edição foi pulada por falta de notícias!\n");
-        return;
-    }
+    if (i == 1)
+        titulo[1][0] = texto[1][0] = '\0';
 
     imprime_edicao(titulo, texto);
+
+exit:
+    fn_atualiza(breakn);
+    fn_atualiza(infs);
 
     return;
 }
