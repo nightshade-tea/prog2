@@ -1,5 +1,5 @@
 #--- CONFIG ---
-MAIN    = main
+MAIN    = teste
 LIBS    = deque
 CC      = gcc
 CFLAGS  = -Wall -Wextra -g -std=c99
