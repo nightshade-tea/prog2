@@ -8,8 +8,8 @@ static nodo *cria_nodo(int val, nodo *prox)
     if ( !(nd = malloc(sizeof(nodo))) )
         return NULL;
 
-    nodo->val = val;
-    nodo->prox = prox;
+    nd->val = val;
+    nd->prox = prox;
 
     return nd;
 }
@@ -42,10 +42,10 @@ void fl_destroi(fila **pfl)
 {
     nodo *nd, *prox;
 
-    if ( !pfl || (*pfl) )
+    if ( !pfl || !(*pfl) )
         return;
 
-    nd = fila->inicio;
+    nd = (*pfl)->inicio;
 
     while (nd) {
         prox = nd->prox;
@@ -66,8 +66,8 @@ int fl_insere(fila *fl, int val)
     if ( !fl || !(nd = cria_nodo(val, NULL)) )
         return -1;
 
-    if ( !(fl->prim) )
-        fl->prim = nd;
+    if ( !(fl->inicio) )
+        fl->inicio = nd;
 
     if (fl->fim)
         fl->fim->prox = nd;
@@ -93,4 +93,12 @@ int fl_retira(fila *fl, int *val)
     destroi_nodo(&nd);
 
     return --(fl->tam);
+}
+
+int fl_tamanho(fila *fl)
+{
+    if (!fl)
+        return -1;
+
+    return fl->tam;
 }

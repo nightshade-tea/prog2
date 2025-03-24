@@ -21,4 +21,6 @@ int fl_insere(fila *fl, int val);
 
 int fl_retira(fila *fl, int *val);
 
+int fl_tamanho(fila *fl);
+
 #endif // !FILA_H
