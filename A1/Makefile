@@ -2,7 +2,7 @@
 
 MAIN		:= vinac
 CC			:= gcc
-CFLAGS		:= -Wall -Wextra -g
+CFLAGS		:= -Wall -Wextra -g -I.
 LDLIBS		:=
 
 SRC_DIRS	:= . lz vc
