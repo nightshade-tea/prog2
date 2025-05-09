@@ -1,29 +1,39 @@
 #--- CONFIG ---
-MAIN    = vinac
-LIBS    = lz
-CC      = gcc
-CFLAGS  = -Wall -Wextra -g
 
-#--- OBJECTS ---
-LIB_OBJS = $(addsuffix .o, $(LIBS))
-MAIN_OBJ = $(MAIN).o
+MAIN		:= vinac
+CC			:= gcc
+CFLAGS		:= -Wall -Wextra -g
+LDLIBS		:=
+
+SRC_DIRS	:= . lz vc
+OBJ_DIR		:= obj
+
+HEADERS		:= $(wildcard $(addsuffix /*.h,$(SRC_DIRS)))
+SRCS		:= $(wildcard $(addsuffix /*.c,$(SRC_DIRS)))
+OBJS		:= $(patsubst %.c,$(OBJ_DIR)/%.o,$(SRCS))
+
 
 #--- BUILD RULES ---
-$(MAIN): $(MAIN_OBJ) $(LIB_OBJS)
+
+$(MAIN): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
-%.o: %.c
+$(OBJ_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+
 #--- PHONY ---
+
 format:
-	clang-format -i -style=gnu $(wildcard $(MAIN).c $(addsuffix .c, $(LIBS)) \
-		$(addsuffix .h, $(LIBS)))
+	clang-format -i -style=gnu \
+		$(SRCS) $(HEADERS)
 
 valgrind: $(MAIN)
-	valgrind --leak-check=full --track-origins=yes ./$(MAIN)
+	valgrind --leak-check=full --track-origins=yes \
+		./$(MAIN)
 
 clean:
-	rm -f $(LIB_OBJS) $(MAIN_OBJ) $(MAIN)
+	rm -rf $(OBJ_DIR) $(MAIN)
 
 .PHONY: format valgrind clean
