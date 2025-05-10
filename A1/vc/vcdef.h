@@ -1,5 +1,5 @@
-#ifndef VC_H
-#define VC_H 1
+#ifndef VCDEF_H
+#define VCDEF_H 1
 
 #include <stdint.h>
 #include <time.h>
@@ -23,4 +23,4 @@ struct directory
   uint32_t memc;       // quantidade de membros em memv
 };
 
-#endif /* vc.h */
+#endif /* vcdef.h */
