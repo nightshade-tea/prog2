@@ -7,12 +7,12 @@
 #include "vc/vcdef.h"
 
 int
-read_dir (const char *vcpath, struct directory *dir)
+read_dir (struct directory *dir, const char *vcpath)
 {
   FILE *vcfp;
   size_t dirsz;
 
-  if (!vcpath || !dir)
+  if (!dir || !vcpath)
     return -1;
 
   if (!(vcfp = fopen (vcpath, "rb")))
@@ -68,12 +68,12 @@ read_dir (const char *vcpath, struct directory *dir)
 }
 
 int
-write_dir (const char *vcpath, struct directory *dir)
+write_dir (struct directory *dir, const char *vcpath)
 {
   FILE *vcfp;
   size_t dirsz;
 
-  if (!vcpath || !dir)
+  if (!dir || !vcpath)
     return -1;
 
   if (!(vcfp = fopen (vcpath, "ab")))
@@ -107,9 +107,9 @@ write_dir (const char *vcpath, struct directory *dir)
 }
 
 int
-mem_index (const char *memname, struct directory *dir)
+mem_index (struct directory *dir, const char *memname)
 {
-  if (!memname || !dir)
+  if (!dir || !memname)
     return -1;
 
   for (uint32_t i = 0; i < dir->memc; i++)
@@ -117,4 +117,59 @@ mem_index (const char *memname, struct directory *dir)
       return i;
 
   return -1;
+}
+
+int
+rm_mem (struct directory *dir, uint32_t idx)
+{
+  struct member *newmemv;
+
+  if (!dir || !dir->memv || idx < 0 || idx >= dir->memc)
+    return -1;
+
+  // remove o membro de memv
+  for (uint32_t i = idx; i < dir->memc - 1; i++)
+    dir->memv[i] = dir->memv[i + 1];
+
+  // atualiza memc
+  dir->memc--;
+
+  // realoca memv
+  if (dir->memc == 0)
+    {
+      free (dir->memv);
+      dir->memv = NULL;
+      return 0;
+    }
+
+  // usa newmemv para não perder o ponteiro original caso realloc falhe
+  if (!(newmemv = realloc (dir->memv, sizeof (struct member) * dir->memc)))
+    return -1;
+
+  dir->memv = newmemv;
+
+  return 0;
+}
+
+int
+add_mem (struct directory *dir, struct member *mem)
+{
+  struct member *newmemv;
+
+  if (!dir || !mem)
+    return -1;
+
+  // realoca memv
+  newmemv = realloc (dir->memv, sizeof (struct member) * (dir->memc + 1));
+
+  if (!newmemv)
+    return -1;
+
+  dir->memv = newmemv;
+
+  // adiciona o novo membro em memv
+  dir->memv[dir->memc] = *mem;
+  dir->memc++;
+
+  return 0;
 }

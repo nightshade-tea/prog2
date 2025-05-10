@@ -20,7 +20,7 @@ ip (int paramc, const char **paramv)
   vcpath = paramv[0];
 
   // carrega o diretório de vcpath, se existir
-  if (read_dir (vcpath, &dir) != 0)
+  if (read_dir (&dir, vcpath) != 0)
     {
       dir.memv = NULL;
       dir.memc = 0;
