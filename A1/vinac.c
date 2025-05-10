@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "vc/vcopr.h"
+
 #define GETOPT_OPTIONS "i::pmxrc"
 
 static void
@@ -41,6 +43,7 @@ main (int argc, char **argv)
 
     case 'p':
       printf ("flag='%c'\n", op);
+      ip (argc - 2, &argv[2]);
       break;
 
     case 'm':

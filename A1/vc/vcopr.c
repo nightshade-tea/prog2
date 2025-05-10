@@ -89,7 +89,7 @@ shift_memfs (uint64_t shift, struct directory *dir, uint32_t idx, FILE *vcfp)
 }
 
 void
-ip (int paramc, const char **paramv)
+ip (int paramc, char **paramv)
 {
   struct directory dir;
   FILE *vcfp;
