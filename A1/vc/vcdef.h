@@ -5,6 +5,9 @@
 #include <sys/types.h>
 #include <time.h>
 
+// o tamanho máximo de um nome de arquivo é 255 caracteres na maioria dos
+// sistemas de arquivos (ext4, ntfs, etc.).
+// então não faz sentido usar um tamanho maior
 #define MAX_NAME_LEN 255
 
 struct member
