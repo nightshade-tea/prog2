@@ -60,7 +60,7 @@ shift_memfs (int64_t shift, struct directory *dir, uint32_t idx, FILE *vcfp)
 {
   struct member *mem;
   char *buffer;
-  uint32_t i;
+  int64_t i;
 
   if (!dir || !dir->memv || !vcfp)
     fatal ("shift_memfs(): parâmetros inválidos");
@@ -294,7 +294,7 @@ static void
 shift_mempos (int shift, struct directory *dir, uint32_t idx)
 {
   struct member *mem;
-  uint32_t i;
+  uint64_t i;
   size_t memvsz;
 
   if (!dir || !dir->memv)
