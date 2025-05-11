@@ -97,14 +97,17 @@ shift_memfs (int64_t shift, struct directory *dir, uint32_t idx, FILE *vcfp)
             fatal ("shift_memfs: falha ao escrever o arquivo '%s'", mem->name);
 
           free (buffer);
-
-          return;
         }
+
+      return;
     }
 
-  for (i = idx + 1; i <= dir->memc; i++)
+  for (i = idx; i < dir->memc; i++)
     {
       mem = &dir->memv[i];
+
+      fprintf (stderr, "shift_memfs: (%s) shift=%lld offset=%llu o-s=%llu\n",
+               mem->name, shift, mem->offset, mem->offset + shift);
 
       // lê o arquivo do membro
       if (!(buffer = malloc (mem->dsz)))
@@ -320,7 +323,7 @@ shift_mempos (int shift, struct directory *dir, uint32_t idx)
       return;
     }
 
-  for (i = idx + 1; i <= dir->memc; i++)
+  for (i = idx; i < dir->memc; i++)
     {
       mem = &dir->memv[i];
       mem->pos += shift;
@@ -389,12 +392,15 @@ m (int paramc, char **paramv)
   // reorganiza os membros em vcfp
   shift_memfs (dir.memv[midx].dsz, &dir, tidx + 1, vcfp);
   shift_mempos (1, &dir, tidx + 1);
+  dir.memc++;
 
   // se o membro foi shiftado, corrige o índice
   if (midx > tidx)
     midx++;
 
   dir.memv[tidx + 1] = dir.memv[midx];
+  dir.memv[tidx + 1].pos = tidx + 1;
+  dir.memv[tidx + 1].offset = dir.memv[tidx].offset + dir.memv[tidx].dsz;
 
   // no disco, copia mem para depois do target
   if (!(buffer = malloc (dir.memv[midx].dsz)))
@@ -406,7 +412,7 @@ m (int paramc, char **paramv)
   if (fread (buffer, dir.memv[midx].dsz, 1, vcfp) != 1)
     fatal ("erro: falha ao ler o arquivo '%s'", paramv[0]);
 
-  if (fseek (vcfp, dir.memv[tidx].offset + dir.memv[tidx].dsz, SEEK_SET) != 0)
+  if (fseek (vcfp, dir.memv[tidx + 1].offset, SEEK_SET) != 0)
     fatal ("erro: falha ao manipular o arquivo '%s'", paramv[0]);
 
   if (fwrite (buffer, dir.memv[midx].dsz, 1, vcfp) != 1)
@@ -416,6 +422,7 @@ m (int paramc, char **paramv)
 
   shift_memfs (-1 * dir.memv[midx].dsz, &dir, midx + 1, vcfp);
   shift_mempos (-1, &dir, midx + 1);
+  dir.memc--;
 
   // grava o diretório no fim do arquivo
   if (write_dir (&dir, vcfp) != 0)
