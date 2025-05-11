@@ -194,6 +194,20 @@ ip (int paramc, char **paramv)
       mx.dsz = st.st_size;
       mx.mtime = st.st_mtime;
 
+      // caso o arquivo seja vazio
+      if (mx.dsz == 0)
+        {
+          mx.pos = dir.memc;
+          mx.offset = 0;
+
+          if (add_mem (&dir, &mx) != 0)
+            fatal ("erro: falha ao adicionar o membro '%s' ao diretório",
+                   paramv[i]);
+
+          fclose (fp);
+          continue;
+        }
+
       if (!(buffer = malloc (st.st_size)))
         fatal ("erro: falha ao alocar memória para ler '%s'", paramv[i]);
 
