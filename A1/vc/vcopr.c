@@ -139,7 +139,7 @@ ins (int paramc, char **paramv, int compress)
 {
   struct directory dir;
   FILE *vcfp;
-  off_t x;
+  off_t dirsz;
 
   if (paramc < 2)
     fatal ("erro: número insuficiente de parâmetros");
@@ -165,9 +165,9 @@ ins (int paramc, char **paramv, int compress)
   // trunca o arquivo para remover o diretório
   if (dir.memc > 0)
     {
-      x = sizeof (struct member) * dir.memc + sizeof (size_t);
+      dirsz = sizeof (struct member) * dir.memc + sizeof (size_t);
 
-      if (trunc_last (vcfp, x) != 0)
+      if (trunc_last (vcfp, dirsz) != 0)
         fatal ("erro: falha ao manipular o arquivo '%s'", paramv[0]);
     }
 
@@ -210,22 +210,22 @@ ins (int paramc, char **paramv, int compress)
           continue;
         }
 
-      if (!(buffer = malloc (st.st_size)))
+      if (!(buffer = malloc (mx.dsz)))
         fatal ("erro: falha ao alocar memória para ler '%s'", paramv[i]);
 
-      if (fread (buffer, st.st_size, 1, fp) != 1)
+      if (fread (buffer, mx.dsz, 1, fp) != 1)
         fatal ("erro: falha ao ler o arquivo '%s'", paramv[i]);
 
       if (compress)
         {
-          compsz = mx.osz * 2;
+          compsz = mx.dsz * 2;
 
           if (!(compressed = malloc (compsz)))
             fatal ("erro: falha ao alocar memória para ler '%s'", paramv[i]);
 
-          compsz = LZ_Compress (buffer, compressed, mx.osz);
+          compsz = LZ_Compress (buffer, compressed, mx.dsz);
 
-          if (compsz <= 0 || compsz >= mx.osz)
+          if (compsz <= 0 || compsz >= mx.dsz)
             {
               free (compressed);
               compressed = NULL;
@@ -273,7 +273,7 @@ ins (int paramc, char **paramv, int compress)
             fatal ("erro: falha ao adicionar o membro '%s' ao diretório",
                    paramv[i]);
 
-          if (fwrite (buffer, st.st_size, 1, vcfp) != 1)
+          if (fwrite (buffer, mx.dsz, 1, vcfp) != 1)
             fatal ("erro: falha ao escrever no arquivo '%s'", paramv[i]);
         }
 
@@ -348,7 +348,7 @@ m (int paramc, char **paramv)
 {
   struct directory dir;
   FILE *vcfp;
-  off_t x;
+  off_t dirsz;
   uint32_t midx, tidx;
   unsigned char *buffer;
   unsigned char tnull; // flag para indicar se o target é NULL
@@ -394,9 +394,9 @@ m (int paramc, char **paramv)
     }
 
   // trunca o arquivo para remover o diretório
-  x = sizeof (struct member) * dir.memc + sizeof (size_t);
+  dirsz = sizeof (struct member) * dir.memc + sizeof (size_t);
 
-  if (trunc_last (vcfp, x) != 0)
+  if (trunc_last (vcfp, dirsz) != 0)
     fatal ("erro: falha ao manipular o arquivo '%s'", paramv[0]);
 
   // reorganiza os membros em vcfp
@@ -444,6 +444,101 @@ m (int paramc, char **paramv)
   // grava o diretório no fim do arquivo
   if (write_dir (&dir, vcfp) != 0)
     fatal ("erro: falha ao gravar o diretório no arquivo '%s'", paramv[0]);
+
+  free (dir.memv);
+  fclose (vcfp);
+}
+
+void
+x (int paramc, char **paramv)
+{
+  struct directory dir;
+  FILE *vcfp;
+  unsigned char xall;
+  uint32_t *idxv;
+  uint32_t idxvc;
+
+  if (paramc < 1)
+    fatal ("erro: número insuficiente de parâmetros");
+
+  if (paramc == 1)
+    xall = 1;
+  else
+    xall = 0;
+
+  if (!(vcfp = fopen (paramv[0], "rb")))
+    fatal ("erro: falha ao abrir o arquivo '%s'", paramv[0]);
+
+  // carrega o diretório de vcpath
+  if (read_dir (&dir, vcfp) != 0)
+    fatal ("erro: falha ao ler o diretório do arquivo '%s'", paramv[0]);
+
+  if (!xall)
+    {
+      if (!(idxv = malloc (sizeof (uint32_t) * (paramc - 1))))
+        fatal ("erro: falha ao alocar memória para os índices");
+
+      idxvc = paramc - 1;
+
+      // preenche o vetor de índices dos membros a serem extraídos
+      for (int i = 1; i < paramc; i++)
+        if ((idxv[i - 1] = mem_index (&dir, paramv[i])) == UINT32_MAX)
+          fatal ("erro: membro '%s' não encontrado", paramv[i]);
+    }
+  else
+    {
+      if (!(idxv = malloc (sizeof (uint32_t) * dir.memc)))
+        fatal ("erro: falha ao alocar memória para os índices");
+
+      idxvc = dir.memc;
+
+      for (uint32_t i = 0; i < dir.memc; i++)
+        idxv[i] = i;
+    }
+
+  // extrai os membros em idxv
+  for (uint32_t i = 0; i < idxvc; i++)
+    {
+      unsigned char *compbuf, *uncompbuf;
+      struct member *mem;
+      FILE *mfp;
+
+      mem = &dir.memv[idxv[i]];
+
+      if (!(compbuf = malloc (mem->dsz)))
+        fatal ("erro: falha ao alocar memória para ler '%s'", mem->name);
+
+      if (fseek (vcfp, mem->offset, SEEK_SET) != 0)
+        fatal ("erro: falha ao manipular o arquivo '%s'", paramv[0]);
+
+      if (fread (compbuf, mem->dsz, 1, vcfp) != 1)
+        fatal ("erro: falha ao ler o membro '%s'", mem->name);
+
+      if (mem->dsz != mem->osz)
+        {
+          if (!(uncompbuf = malloc (mem->osz)))
+            fatal ("erro: falha ao alocar memória para ler '%s'", mem->name);
+
+          LZ_Uncompress (compbuf, uncompbuf, mem->dsz);
+
+          free (compbuf);
+          compbuf = NULL;
+        }
+      else
+        {
+          uncompbuf = compbuf;
+          compbuf = NULL;
+        }
+
+      if (!(mfp = fopen (mem->name, "wb")))
+        fatal ("erro: falha ao abrir o arquivo '%s'", mem->name);
+
+      if (fwrite (uncompbuf, mem->osz, 1, mfp) != 1)
+        fatal ("erro: falha ao escrever o arquivo '%s'", mem->name);
+
+      free (uncompbuf);
+      fclose (mfp);
+    }
 
   free (dir.memv);
   fclose (vcfp);

@@ -14,4 +14,7 @@ void ic (int paramc, char **paramv);
 /* mover membros */
 void m (int paramc, char **paramv);
 
+/* extrair membros */
+void x (int paramc, char **paramv);
+
 #endif /* vcopr.h */
