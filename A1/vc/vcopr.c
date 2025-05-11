@@ -305,6 +305,13 @@ shift_mempos (int shift, struct directory *dir, uint32_t idx)
 
   if (shift > 0)
     {
+      if (memvsz == 0)
+        {
+          free (dir->memv);
+          dir->memv = NULL;
+          return;
+        }
+
       if (!(dir->memv = realloc (dir->memv, memvsz)))
         fatal ("shift_mempos: falha ao realocar memória para o diretório");
 
@@ -321,6 +328,13 @@ shift_mempos (int shift, struct directory *dir, uint32_t idx)
     {
       mem = &dir->memv[i];
       dir->memv[i + shift] = *mem;
+    }
+
+  if (memvsz == 0)
+    {
+      free (dir->memv);
+      dir->memv = NULL;
+      return;
     }
 
   if (!(dir->memv = realloc (dir->memv, memvsz)))
