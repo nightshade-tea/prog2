@@ -1,6 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "vc/vcopr.h"
@@ -40,7 +41,24 @@ main (int argc, char **argv)
   switch (op)
     {
     case 'i':
-      printf ("flag='%c' optarg='%s'\n", op, optarg);
+      if (optarg)
+        {
+          // -ic
+          if (strcmp (optarg, "c") == 0)
+            ic (argc - optind, &argv[optind]);
+
+          // -ip
+          else if (strcmp (optarg, "p") == 0)
+            ip (argc - optind, &argv[optind]);
+
+          else
+            fatal ("erro: opção desconhecida '-i%s'", optarg);
+        }
+
+      // -i
+      else
+        ic (argc - optind, &argv[optind]);
+
       break;
 
     case 'p':

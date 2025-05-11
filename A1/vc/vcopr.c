@@ -6,8 +6,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "lz/lz.h"
 #include "vc/vcdef.h"
 #include "vc/vcdir.h"
+#include "vc/vcopr.h"
 
 static void
 fatal (const char *format, ...)
@@ -134,8 +136,8 @@ shift_memfs (int64_t shift, struct directory *dir, uint32_t idx, FILE *vcfp)
     }
 }
 
-void
-ip (int paramc, char **paramv)
+static void
+ins (int paramc, char **paramv, int compress)
 {
   struct directory dir;
   FILE *vcfp;
@@ -178,7 +180,9 @@ ip (int paramc, char **paramv)
       struct member mx;
       struct stat st;
       FILE *fp;
-      char *buffer;
+      unsigned char *buffer;
+      unsigned char *compressed;
+      uint64_t compsz;
 
       strncpy (mx.name, paramv[i], MAX_NAME_LEN);
       mx.name[MAX_NAME_LEN] = '\0';
@@ -213,6 +217,28 @@ ip (int paramc, char **paramv)
 
       if (fread (buffer, st.st_size, 1, fp) != 1)
         fatal ("erro: falha ao ler o arquivo '%s'", paramv[i]);
+
+      if (compress)
+        {
+          compsz = mx.osz * 2;
+
+          if (!(compressed = malloc (compsz)))
+            fatal ("erro: falha ao alocar memória para ler '%s'", paramv[i]);
+
+          compsz = LZ_Compress (buffer, compressed, mx.osz);
+
+          if (compsz <= 0 || compsz >= mx.osz)
+            {
+              free (compressed);
+              compressed = NULL;
+            }
+          else
+            {
+              free (buffer);
+              buffer = compressed;
+              mx.dsz = compsz;
+            }
+        }
 
       // caso em que o membro já existe
       if ((idx = mem_index (&dir, paramv[i])) != UINT32_MAX)
@@ -263,4 +289,16 @@ ip (int paramc, char **paramv)
 
   free (dir.memv);
   fclose (vcfp);
+}
+
+void
+ip (int paramc, char **paramv)
+{
+  ins (paramc, paramv, 0);
+}
+
+void
+ic (int paramc, char **paramv)
+{
+  ins (paramc, paramv, 1);
 }
