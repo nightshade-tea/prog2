@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "lz/lz.h"
@@ -608,5 +609,49 @@ r (int paramc, char **paramv)
 void
 c (int paramc, char **paramv)
 {
-  return;
+  struct directory dir;
+  FILE *vcfp;
+
+  if (paramc < 1)
+    fatal ("erro: número insuficiente de parâmetros");
+
+  if (paramc > 1)
+    fatal ("erro: número excessivo de parâmetros");
+
+  if (!(vcfp = fopen (paramv[0], "rb")))
+    fatal ("erro: falha ao abrir o arquivo '%s'", paramv[0]);
+
+  // carrega o diretório de vcpath
+  if (read_dir (&dir, vcfp) != 0)
+    fatal ("erro: falha ao ler o diretório do arquivo '%s'", paramv[0]);
+
+  printf ("\narquivo %s (%u membros):\n", paramv[0], dir.memc);
+  printf (
+      "----------------------------------------------------------------\n");
+  printf ("%-20s %-10s %-10s %-10s %-10s\n", "nome", "original", "arquivado",
+          "modificado", "UID");
+  printf (
+      "----------------------------------------------------------------\n");
+  for (uint32_t i = 0; i < dir.memc; i++)
+    {
+      struct member *mem;
+      time_t mtime;
+      struct tm *tmtime;
+      char time[9];
+
+      mem = &dir.memv[i];
+      mtime = mem->mtime; // evitar warning por mtime não ser alinhado
+      tmtime = localtime (&mtime);
+
+      if (strftime (time, sizeof time, "%d/%m/%y", tmtime) == 0)
+        time[0] = '\0';
+
+      printf ("%-20s %-10llu %-10llu %-10s %-10u\n", mem->name, mem->osz,
+              mem->dsz, time, mem->uid);
+    }
+  printf (
+      "----------------------------------------------------------------\n\n");
+
+  free (dir.memv);
+  fclose (vcfp);
 }
