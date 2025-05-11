@@ -11,4 +11,7 @@ void ip (int paramc, char **paramv);
 /* insere com compressão */
 void ic (int paramc, char **paramv);
 
+/* mover membros */
+void m (int paramc, char **paramv);
+
 #endif /* vcopr.h */
