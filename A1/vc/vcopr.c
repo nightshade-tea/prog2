@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +18,10 @@ fatal (const char *format, ...)
   vfprintf (stderr, format, args);
   va_end (args);
 
-  perror ("vcopr");
+  if (errno)
+    perror (" :");
+  else
+    fprintf (stderr, "\n");
 
   exit (1);
 }
@@ -50,41 +54,83 @@ trunc_last (FILE *f, off_t x)
 
 // empurra todos os arquivos dos membros de índice > idx no arquivo vcfp
 static void
-shift_memfs (uint64_t shift, struct directory *dir, uint32_t idx, FILE *vcfp)
+shift_memfs (int64_t shift, struct directory *dir, uint32_t idx, FILE *vcfp)
 {
   struct member *mem;
   char *buffer;
   uint32_t i;
 
   if (!dir || !dir->memv || idx >= dir->memc || !vcfp)
-    fatal ("shitft_memfs(): parâmetros inválidos\n");
+    fatal ("shitft_memfs(): parâmetros inválidos");
 
-  // itera do início ao fim para não sobrescrever dados
-  for (i = dir->memc - 1; i > idx; i--)
+  if (shift == 0)
+    return;
+
+  if (shift > 0)
     {
-      mem = &dir->memv[i];
+      for (i = dir->memc - 1; i > idx; i--)
+        {
+          mem = &dir->memv[i];
 
-      // lê o arquivo do membro
-      if (!(buffer = malloc (mem->dsz)))
-        fatal ("shift_memfs: falha ao alocar memória para ler '%s'\n",
-               mem->name);
+          // lê o arquivo do membro
+          if (!(buffer = malloc (mem->dsz)))
+            fatal ("shift_memfs: falha ao alocar memória para ler '%s'",
+                   mem->name);
 
-      if (fseek (vcfp, mem->offset, SEEK_SET) != 0)
-        fatal ("shift_memfs: falha ao manipular o arquivo '%s'\n", mem->name);
+          if (fseek (vcfp, mem->offset, SEEK_SET) != 0)
+            fatal ("shift_memfs: falha ao manipular o arquivo '%s'",
+                   mem->name);
 
-      if (fread (buffer, mem->dsz, 1, vcfp) != 1)
-        fatal ("shift_memfs: falha ao ler o arquivo '%s'\n", mem->name);
+          if (fread (buffer, mem->dsz, 1, vcfp) != 1)
+            fatal ("shift_memfs: falha ao ler o arquivo '%s'", mem->name);
 
-      mem->offset += shift;
+          mem->offset += shift;
 
-      // escreve na nova posição
-      if (fseek (vcfp, mem->offset, SEEK_SET) != 0)
-        fatal ("shift_memfs: falha ao manipular o arquivo '%s'\n", mem->name);
+          // escreve na nova posição
+          if (fseek (vcfp, mem->offset, SEEK_SET) != 0)
+            fatal ("shift_memfs: falha ao manipular o arquivo '%s'",
+                   mem->name);
 
-      if (fwrite (buffer, mem->dsz, 1, vcfp) != 1)
-        fatal ("shift_memfs: falha ao escrever o arquivo '%s'\n", mem->name);
+          if (fwrite (buffer, mem->dsz, 1, vcfp) != 1)
+            fatal ("shift_memfs: falha ao escrever o arquivo '%s'", mem->name);
 
-      free (buffer);
+          free (buffer);
+        }
+    }
+  else
+    {
+      for (i = idx + 1; i < dir->memc; i++)
+        {
+          mem = &dir->memv[i];
+
+          // lê o arquivo do membro
+          if (!(buffer = malloc (mem->dsz)))
+            fatal ("shift_memfs: falha ao alocar memória para ler '%s'",
+                   mem->name);
+
+          if (fseek (vcfp, mem->offset, SEEK_SET) != 0)
+            fatal ("shift_memfs: falha ao manipular o arquivo '%s'",
+                   mem->name);
+
+          if (fread (buffer, mem->dsz, 1, vcfp) != 1)
+            fatal ("shift_memfs: falha ao ler o arquivo '%s'", mem->name);
+
+          mem->offset += shift;
+
+          // escreve na nova posição
+          if (fseek (vcfp, mem->offset, SEEK_SET) != 0)
+            fatal ("shift_memfs: falha ao manipular o arquivo '%s'",
+                   mem->name);
+
+          if (fwrite (buffer, mem->dsz, 1, vcfp) != 1)
+            fatal ("shift_memfs: falha ao escrever o arquivo '%s'", mem->name);
+
+          free (buffer);
+        }
+
+      // trunca o excesso
+      if (trunc_last (vcfp, -1 * shift) != 0)
+        fatal ("shift_memfs: falha ao truncar");
     }
 }
 
@@ -96,15 +142,18 @@ ip (int paramc, char **paramv)
   off_t x;
 
   if (paramc < 2)
-    fatal ("erro: número insuficiente de parâmetros\n");
+    fatal ("erro: número insuficiente de parâmetros");
 
   // checa se podemos ler todos os membros do disco
   for (int i = 1; i < paramc; i++)
     if (access (paramv[i], R_OK) != 0)
-      fatal ("erro: não é possível ler o arquivo '%s'\n", paramv[i]);
+      fatal ("erro: não é possível ler o arquivo '%s'", paramv[i]);
 
-  if (!(vcfp = fopen (paramv[0], "a+b")))
-    fatal ("erro: falha ao abrir o arquivo '%s'\n", paramv[0]);
+  // tenta abrir o arquivo vcpath, se não existir cria
+  errno = 0;
+  if (!(vcfp = fopen (paramv[0], "rb+")))
+    if (errno != ENOENT || !(vcfp = fopen (paramv[0], "wb+")))
+      fatal ("erro: falha ao abrir o arquivo '%s'", paramv[0]);
 
   // carrega o diretório de vcpath, se existir
   if (read_dir (&dir, vcfp) != 0)
@@ -119,7 +168,7 @@ ip (int paramc, char **paramv)
       x = sizeof (struct member) * dir.memc + sizeof (size_t);
 
       if (trunc_last (vcfp, x) != 0)
-        fatal ("erro: falha ao manipular o arquivo '%s'\n", paramv[0]);
+        fatal ("erro: falha ao manipular o arquivo '%s'", paramv[0]);
     }
 
   // reorganiza os membros em vcfp
@@ -135,10 +184,10 @@ ip (int paramc, char **paramv)
       mx.name[MAX_NAME_LEN] = '\0';
 
       if (!(fp = fopen (paramv[i], "rb")))
-        fatal ("erro: falha ao abrir o arquivo '%s'\n", paramv[i]);
+        fatal ("erro: falha ao abrir o arquivo '%s'", paramv[i]);
 
       if (fstat (fileno (fp), &st) != 0)
-        fatal ("erro: fstat falhou com '%s'\n", paramv[i]);
+        fatal ("erro: fstat falhou com '%s'", paramv[i]);
 
       mx.uid = st.st_uid;
       mx.osz = st.st_size;
@@ -146,16 +195,16 @@ ip (int paramc, char **paramv)
       mx.mtime = st.st_mtime;
 
       if (!(buffer = malloc (st.st_size)))
-        fatal ("erro: falha ao alocar memória para ler '%s'\n", paramv[i]);
+        fatal ("erro: falha ao alocar memória para ler '%s'", paramv[i]);
 
       if (fread (buffer, st.st_size, 1, fp) != 1)
-        fatal ("erro: falha ao ler o arquivo '%s'\n", paramv[i]);
+        fatal ("erro: falha ao ler o arquivo '%s'", paramv[i]);
 
       // caso em que o membro já existe
       if ((idx = mem_index (&dir, paramv[i])) != UINT32_MAX)
         {
           struct member *pmy;
-          uint64_t shift;
+          int64_t shift;
 
           pmy = &dir.memv[idx];
           mx.offset = pmy->offset;
@@ -165,10 +214,10 @@ ip (int paramc, char **paramv)
           shift_memfs (shift, &dir, idx, vcfp);
 
           if (fseek (vcfp, mx.offset, SEEK_SET) != 0)
-            fatal ("erro: falha ao manipular o arquivo '%s'\n", paramv[i]);
+            fatal ("erro: falha ao manipular o arquivo '%s'", paramv[i]);
 
           if (fwrite (buffer, mx.dsz, 1, vcfp) != 1)
-            fatal ("erro: falha ao escrever o arquivo '%s'\n", paramv[i]);
+            fatal ("erro: falha ao escrever o arquivo '%s'", paramv[i]);
 
           *pmy = mx;
         }
@@ -178,16 +227,16 @@ ip (int paramc, char **paramv)
           mx.pos = dir.memc;
 
           if (fseek (vcfp, 0, SEEK_END) != 0)
-            fatal ("erro: falha ao manipular o arquivo '%s'\n", paramv[i]);
+            fatal ("erro: falha ao manipular o arquivo '%s'", paramv[i]);
 
           mx.offset = ftell (vcfp);
 
           if (add_mem (&dir, &mx) != 0)
-            fatal ("erro: falha ao adicionar o membro '%s' ao diretório\n",
+            fatal ("erro: falha ao adicionar o membro '%s' ao diretório",
                    paramv[i]);
 
           if (fwrite (buffer, st.st_size, 1, vcfp) != 1)
-            fatal ("erro: falha ao escrever no arquivo '%s'\n", paramv[i]);
+            fatal ("erro: falha ao escrever no arquivo '%s'", paramv[i]);
         }
 
       free (buffer);
@@ -196,7 +245,7 @@ ip (int paramc, char **paramv)
 
   // grava o diretório no fim do arquivo
   if (write_dir (&dir, vcfp) != 0)
-    fatal ("erro: falha ao gravar o diretório no arquivo '%s'\n", paramv[0]);
+    fatal ("erro: falha ao gravar o diretório no arquivo '%s'", paramv[0]);
 
   free (dir.memv);
   fclose (vcfp);

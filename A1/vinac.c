@@ -16,6 +16,8 @@ fatal (const char *format, ...)
   vfprintf (stderr, format, args);
   va_end (args);
 
+  fprintf (stderr, "\n");
+
   exit (1);
 }
 
@@ -27,13 +29,13 @@ main (int argc, char **argv)
   opterr = 0;
 
   if ((op = getopt (argc, argv, GETOPT_OPTIONS)) == -1)
-    fatal ("erro: nenhuma opção fornecida\n");
+    fatal ("erro: nenhuma opção fornecida");
 
   // se apenas uma opção for passada, essa segunda chamada a getopt () não
   // altera as variáveis opt*. se mais de uma opção for passada é um erro.
 
   if (getopt (argc, argv, GETOPT_OPTIONS) != -1)
-    fatal ("erro: mais de uma opção fornecida\n");
+    fatal ("erro: mais de uma opção fornecida");
 
   switch (op)
     {
@@ -42,8 +44,7 @@ main (int argc, char **argv)
       break;
 
     case 'p':
-      printf ("flag='%c'\n", op);
-      ip (argc - 2, &argv[2]);
+      ip (argc - optind, &argv[optind]);
       break;
 
     case 'm':
@@ -63,18 +64,13 @@ main (int argc, char **argv)
       break;
 
     case '?':
-      fatal ("erro: opção desconhecida '-%c'\n", optopt);
+      fatal ("erro: opção desconhecida '-%c'", optopt);
       break;
 
     default:
-      fatal ("erro: opção não implementada '-%c'\n", op);
+      fatal ("erro: opção não implementada '-%c'", op);
       break;
     }
-
-  printf ("optind=%d\n", optind);
-
-  for (int i = optind; i < argc; i++)
-    printf ("argv[%i]='%s'\n", i, argv[i]);
 
   return 0;
 }
