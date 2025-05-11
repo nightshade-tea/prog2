@@ -11,7 +11,7 @@
 #include "vc/vcdir.h"
 #include "vc/vcopr.h"
 
-static void
+static __attribute__ ((noreturn)) void
 fatal (const char *format, ...)
 {
   va_list args;
@@ -603,4 +603,10 @@ r (int paramc, char **paramv)
     }
 
   free (dir.memv);
+}
+
+void
+c (int paramc, char **paramv)
+{
+  return;
 }

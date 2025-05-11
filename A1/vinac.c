@@ -8,7 +8,7 @@
 
 #define GETOPT_OPTIONS "i::pmxrc"
 
-static void
+static __attribute__ ((noreturn)) void
 fatal (const char *format, ...)
 {
   va_list args;
@@ -25,6 +25,7 @@ fatal (const char *format, ...)
 int
 main (int argc, char **argv)
 {
+  void (*opfunc) (int, char **);
   int op;
 
   opterr = 0;
@@ -45,11 +46,11 @@ main (int argc, char **argv)
         {
           // -ic
           if (strcmp (optarg, "c") == 0)
-            ic (argc - optind, &argv[optind]);
+            opfunc = ic;
 
           // -ip
           else if (strcmp (optarg, "p") == 0)
-            ip (argc - optind, &argv[optind]);
+            opfunc = ip;
 
           else
             fatal ("erro: opção desconhecida '-i%s'", optarg);
@@ -57,28 +58,28 @@ main (int argc, char **argv)
 
       // -i
       else
-        ic (argc - optind, &argv[optind]);
+        opfunc = ic;
 
       break;
 
     case 'p':
-      ip (argc - optind, &argv[optind]);
+      opfunc = ip;
       break;
 
     case 'm':
-      m (argc - optind, &argv[optind]);
+      opfunc = m;
       break;
 
     case 'x':
-      x (argc - optind, &argv[optind]);
+      opfunc = x;
       break;
 
     case 'r':
-      r (argc - optind, &argv[optind]);
+      opfunc = r;
       break;
 
     case 'c':
-      printf ("flag='%c'\n", op);
+      opfunc = c;
       break;
 
     case '?':
@@ -89,6 +90,8 @@ main (int argc, char **argv)
       fatal ("erro: opção não implementada '-%c'", op);
       break;
     }
+
+  (*opfunc) (argc - optind, &argv[optind]);
 
   return 0;
 }

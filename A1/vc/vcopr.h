@@ -20,4 +20,7 @@ void x (int paramc, char **paramv);
 /* remove membros */
 void r (int paramc, char **paramv);
 
+/* imprime membros */
+void c (int paramc, char **paramv);
+
 #endif /* vcopr.h */
