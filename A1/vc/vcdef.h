@@ -13,12 +13,11 @@
 struct member
 {
   char name[MAX_NAME_LEN + 1]; // nome do membro
-  uid_t uid;                   // user id
-  uint32_t pos;                // posição no arquivo
   uint64_t osz;                // tamanho original
   uint64_t dsz;                // tamanho em disco
   uint64_t offset;             // offset em relação ao início do arquivo
   time_t mtime;                // momento da última modificação
+  uid_t uid;                   // user id
 } __attribute__ ((packed));
 
 struct directory

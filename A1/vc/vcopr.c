@@ -199,7 +199,6 @@ ins (int paramc, char **paramv, int compress)
       // caso o arquivo seja vazio
       if (mx.dsz == 0)
         {
-          mx.pos = dir.memc;
           mx.offset = 0;
 
           if (add_mem (&dir, &mx) != 0)
@@ -246,7 +245,6 @@ ins (int paramc, char **paramv, int compress)
 
           pmy = &dir.memv[idx];
           mx.offset = pmy->offset;
-          mx.pos = pmy->pos;
           shift = mx.dsz - pmy->dsz;
 
           shift_memfs (shift, &dir, idx + 1, vcfp);
@@ -262,8 +260,6 @@ ins (int paramc, char **paramv, int compress)
 
       else
         {
-          mx.pos = dir.memc;
-
           if (fseek (vcfp, 0, SEEK_END) != 0)
             fatal ("erro: falha ao manipular o arquivo '%s'", paramv[i]);
 
@@ -313,7 +309,6 @@ shift_mempos (int shift, struct directory *dir, uint32_t idx)
       for (i = dir->memc - 1; i >= idx; i--)
         {
           mem = &dir->memv[i];
-          mem->pos += shift;
           dir->memv[i + shift] = *mem;
         }
 
@@ -323,7 +318,6 @@ shift_mempos (int shift, struct directory *dir, uint32_t idx)
   for (i = idx; i < dir->memc; i++)
     {
       mem = &dir->memv[i];
-      mem->pos += shift;
       dir->memv[i + shift] = *mem;
     }
 
@@ -411,7 +405,6 @@ m (int paramc, char **paramv)
     midx++;
 
   dir.memv[tidx + !tnull] = dir.memv[midx];
-  dir.memv[tidx + !tnull].pos = tidx + !tnull;
 
   if (tnull)
     dir.memv[tidx + !tnull].offset = 0;
