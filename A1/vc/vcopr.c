@@ -351,9 +351,18 @@ m (int paramc, char **paramv)
   off_t x;
   uint32_t midx, tidx;
   unsigned char *buffer;
+  unsigned char tnull; // flag para indicar se o target é NULL
 
-  if (paramc != 3)
-    fatal ("erro: a opção -m requer exatamente um arquivo e dois membros");
+  if (paramc < 2)
+    fatal ("erro: número insuficiente de parâmetros");
+
+  if (paramc > 3)
+    fatal ("erro: número excessivo de parâmetros");
+
+  if (paramc == 2)
+    tnull = 1;
+  else
+    tnull = 0;
 
   if (!(vcfp = fopen (paramv[0], "rb+")))
     fatal ("erro: falha ao abrir o arquivo '%s'", paramv[0]);
@@ -364,7 +373,11 @@ m (int paramc, char **paramv)
 
   // pega os índices de membro e target
   midx = mem_index (&dir, paramv[1]);
-  tidx = mem_index (&dir, paramv[2]);
+
+  if (tnull)
+    tidx = 0;
+  else
+    tidx = mem_index (&dir, paramv[2]);
 
   if (midx == UINT32_MAX)
     fatal ("erro: o membro '%s' não existe", paramv[1]);
@@ -373,7 +386,7 @@ m (int paramc, char **paramv)
     fatal ("erro: o membro '%s' não existe", paramv[2]);
 
   // casos que não precisa mover nada
-  if (midx == tidx || midx == tidx + 1)
+  if (midx == tidx || (!tnull && midx == tidx + 1))
     {
       free (dir.memv);
       fclose (vcfp);
@@ -387,17 +400,24 @@ m (int paramc, char **paramv)
     fatal ("erro: falha ao manipular o arquivo '%s'", paramv[0]);
 
   // reorganiza os membros em vcfp
-  shift_memfs (dir.memv[midx].dsz, &dir, tidx + 1, vcfp);
-  shift_mempos (1, &dir, tidx + 1);
+  // tnull = 0 -> !tnull = 1 ; tnull = 1 -> !tnull = 0
+
+  shift_memfs (dir.memv[midx].dsz, &dir, tidx + !tnull, vcfp);
+  shift_mempos (1, &dir, tidx + !tnull);
   dir.memc++;
 
   // se o membro foi shiftado, corrige o índice
-  if (midx > tidx)
+  if (midx >= tidx + !tnull)
     midx++;
 
-  dir.memv[tidx + 1] = dir.memv[midx];
-  dir.memv[tidx + 1].pos = tidx + 1;
-  dir.memv[tidx + 1].offset = dir.memv[tidx].offset + dir.memv[tidx].dsz;
+  dir.memv[tidx + !tnull] = dir.memv[midx];
+  dir.memv[tidx + !tnull].pos = tidx + !tnull;
+
+  if (tnull)
+    dir.memv[tidx + !tnull].offset = 0;
+  else
+    dir.memv[tidx + !tnull].offset
+        = dir.memv[tidx].offset + dir.memv[tidx].dsz;
 
   // no disco, copia mem para depois do target
   if (!(buffer = malloc (dir.memv[midx].dsz)))
@@ -409,7 +429,7 @@ m (int paramc, char **paramv)
   if (fread (buffer, dir.memv[midx].dsz, 1, vcfp) != 1)
     fatal ("erro: falha ao ler o arquivo '%s'", paramv[0]);
 
-  if (fseek (vcfp, dir.memv[tidx + 1].offset, SEEK_SET) != 0)
+  if (fseek (vcfp, dir.memv[tidx + !tnull].offset, SEEK_SET) != 0)
     fatal ("erro: falha ao manipular o arquivo '%s'", paramv[0]);
 
   if (fwrite (buffer, dir.memv[midx].dsz, 1, vcfp) != 1)
