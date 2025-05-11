@@ -91,7 +91,7 @@ rm_mem (struct directory *dir, uint32_t idx)
 {
   struct member *newmemv;
 
-  if (!dir || !dir->memv || idx < 0 || idx >= dir->memc)
+  if (!dir || !dir->memv || idx >= dir->memc)
     return -1;
 
   // remove o membro de memv
