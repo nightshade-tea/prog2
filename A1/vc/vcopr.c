@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <inttypes.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -646,8 +647,9 @@ c (int paramc, char **paramv)
       if (strftime (time, sizeof time, "%d/%m/%y", tmtime) == 0)
         time[0] = '\0';
 
-      printf ("%-20s %-10llu %-10llu %-10s %-10u\n", mem->name, mem->osz,
-              mem->dsz, time, mem->uid);
+      // PRIu64 é o formato correto pra imprimir uint64_t
+      printf ("%-20s %-10" PRIu64 " %-10" PRIu64 " %-10s %-10u\n", mem->name,
+              mem->osz, mem->dsz, time, mem->uid);
     }
   printf (
       "----------------------------------------------------------------\n\n");
