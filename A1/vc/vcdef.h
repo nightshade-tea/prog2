@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <time.h>
 
-#define MAX_NAME_LEN 1024
+#define MAX_NAME_LEN 255
 
 struct member
 {
