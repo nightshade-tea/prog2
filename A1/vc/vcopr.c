@@ -294,7 +294,7 @@ static void
 shift_mempos (int shift, struct directory *dir, uint32_t idx)
 {
   struct member *mem;
-  uint64_t i;
+  int64_t i;
   size_t memvsz;
 
   if (!dir || !dir->memv)
