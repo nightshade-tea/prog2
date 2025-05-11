@@ -106,9 +106,6 @@ shift_memfs (int64_t shift, struct directory *dir, uint32_t idx, FILE *vcfp)
     {
       mem = &dir->memv[i];
 
-      fprintf (stderr, "shift_memfs: (%s) shift=%lld offset=%llu o-s=%llu\n",
-               mem->name, shift, mem->offset, mem->offset + shift);
-
       // lê o arquivo do membro
       if (!(buffer = malloc (mem->dsz)))
         fatal ("shift_memfs: falha ao alocar memória para ler '%s'",
