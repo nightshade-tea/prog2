@@ -74,7 +74,7 @@ main (int argc, char **argv)
       break;
 
     case 'r':
-      printf ("flag='%c'\n", op);
+      r (argc - optind, &argv[optind]);
       break;
 
     case 'c':

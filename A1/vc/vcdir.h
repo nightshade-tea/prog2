@@ -13,9 +13,6 @@ int write_dir (struct directory *dir, FILE *vcfp);
    se não encontrado */
 uint32_t mem_index (struct directory *dir, const char *memname);
 
-/* remove o membro de índice idx do vetor dir->memv */
-int rm_mem (struct directory *dir, uint32_t idx);
-
 /* adiciona o membro mem ao final do vetor dir->memv */
 int add_mem (struct directory *dir, struct member *mem);
 

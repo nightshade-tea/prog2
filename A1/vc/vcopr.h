@@ -11,10 +11,13 @@ void ip (int paramc, char **paramv);
 /* insere com compressão */
 void ic (int paramc, char **paramv);
 
-/* mover membros */
+/* move membros */
 void m (int paramc, char **paramv);
 
-/* extrair membros */
+/* extrai membros */
 void x (int paramc, char **paramv);
+
+/* remove membros */
+void r (int paramc, char **paramv);
 
 #endif /* vcopr.h */

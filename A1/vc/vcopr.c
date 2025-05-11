@@ -543,3 +543,71 @@ x (int paramc, char **paramv)
   free (dir.memv);
   fclose (vcfp);
 }
+
+void
+r (int paramc, char **paramv)
+{
+  struct directory dir;
+  FILE *vcfp;
+  off_t dirsz;
+  uint32_t *idxv;
+  uint32_t idxvc;
+
+  if (paramc < 2)
+    fatal ("erro: número insuficiente de parâmetros");
+
+  if (!(vcfp = fopen (paramv[0], "rb+")))
+    fatal ("erro: falha ao abrir o arquivo '%s'", paramv[0]);
+
+  // carrega o diretório de vcpath
+  if (read_dir (&dir, vcfp) != 0)
+    fatal ("erro: falha ao ler o diretório do arquivo '%s'", paramv[0]);
+
+  // preenche idxv
+  if (!(idxv = malloc (sizeof (uint32_t) * (paramc - 1))))
+    fatal ("erro: falha ao alocar memória para os índices");
+
+  idxvc = paramc - 1;
+
+  // preenche o vetor de índices dos membros a serem extraídos
+  for (int i = 1; i < paramc; i++)
+    if ((idxv[i - 1] = mem_index (&dir, paramv[i])) == UINT32_MAX)
+      fatal ("erro: membro '%s' não encontrado", paramv[i]);
+
+  // trunca o arquivo para remover o diretório
+  dirsz = sizeof (struct member) * dir.memc + sizeof (size_t);
+
+  if (trunc_last (vcfp, dirsz) != 0)
+    fatal ("erro: falha ao manipular o arquivo '%s'", paramv[0]);
+
+  // remove os membros de vcfp
+  for (uint32_t i = 0; i < idxvc; i++)
+    {
+      struct member *mem;
+      int64_t shift;
+
+      mem = &dir.memv[idxv[i]];
+      shift = -1 * mem->dsz;
+
+      shift_memfs (shift, &dir, idxv[i] + 1, vcfp);
+      shift_mempos (-1, &dir, idxv[i] + 1);
+      dir.memc--;
+    }
+
+  // grava o diretório no fim do arquivo
+  if (dir.memc == 0)
+    {
+      // se o diretório estiver vazio, remove o arquivo
+      fclose (vcfp);
+      unlink (paramv[0]);
+    }
+  else
+    {
+      if (write_dir (&dir, vcfp) != 0)
+        fatal ("erro: falha ao gravar o diretório no arquivo '%s'", paramv[0]);
+
+      fclose (vcfp);
+    }
+
+  free (dir.memv);
+}
