@@ -682,6 +682,7 @@ z (int paramc, char **paramv)
   size_t vcfnamesz;
   uint64_t new_offset;
 
+  // precisamos de no mínimo um arquivo .vc e um membro
   if (paramc < 2)
     fatal ("erro: número insuficiente de parâmetros");
 
