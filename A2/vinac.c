@@ -6,7 +6,7 @@
 
 #include "vc/vcopr.h"
 
-#define GETOPT_OPTIONS "i::pmxrc"
+#define GETOPT_OPTIONS "i::pmxrcz"
 
 static __attribute__ ((noreturn)) void
 fatal (const char *format, ...)
@@ -80,6 +80,10 @@ main (int argc, char **argv)
 
     case 'c':
       opfunc = c;
+      break;
+
+    case 'z':
+      opfunc = z;
       break;
 
     case '?':

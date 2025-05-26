@@ -671,3 +671,116 @@ c (int paramc, char **paramv)
   free (dir.memv);
   fclose (vcfp);
 }
+
+void
+z (int paramc, char **paramv)
+{
+  struct directory dir, new_dir;
+  FILE *vcfp, *new_vcfp;
+  char *new_vcfname;
+  uint32_t *idxv;
+  size_t vcfnamesz;
+  uint64_t new_offset;
+
+  if (paramc < 2)
+    fatal ("erro: número insuficiente de parâmetros");
+
+  // tenta abrir o arquivo .vc, se não existir, erro
+  if (!(vcfp = fopen (paramv[0], "rb")))
+    fatal ("erro: falha ao abrir o arquivo '%s'", paramv[0]);
+
+  // carrega o diretório
+  if (read_dir (&dir, vcfp) != 0)
+    fatal ("erro: falha ao ler o diretório do arquivo '%s'", paramv[0]);
+
+  // seta memc
+  // paramc: arquivo.vc membro1 membro2 ...
+  new_dir.memc = paramc - 1;
+
+  // aloca o vetor de indices
+  if (!(idxv = malloc (sizeof (uint32_t) * (new_dir.memc))))
+    fatal ("erro: falha ao alocar memória para os índices");
+
+  // preenche o vetor de indices dos membros selecionados, checando se existem
+  for (int i = 1; i < paramc; i++)
+    if ((idxv[i - 1] = mem_index (&dir, paramv[i])) == UINT32_MAX)
+      fatal ("erro: membro '%s' não encontrado", paramv[i]);
+
+  // aloca memv do novo struct dir
+  if (!(new_dir.memv = malloc (sizeof (struct member) * new_dir.memc)))
+    fatal ("erro: falha ao alocar memória para o novo diretório");
+
+  // copia os struct members dos selecionados para o novo memv, ajustando os
+  // offsets
+  new_offset = 0;
+  for (uint32_t i = 0; i < new_dir.memc; i++)
+    {
+      memcpy (&new_dir.memv[i], &dir.memv[idxv[i]], sizeof (struct member));
+
+      new_dir.memv[i].offset = new_offset;
+      new_offset += new_dir.memv[i].dsz;
+    }
+
+  // tamanho para o buffer que contem o nome do arquivo .vc
+  vcfnamesz = strlen (paramv[0]) + 1;
+
+  // aloca o nome do novo .vc
+  if (!(new_vcfname = malloc ((vcfnamesz + 2) * sizeof (char))))
+    fatal ("erro: falha ao alocar memória para o novo filename");
+
+  // copia o nome antigo, sem ".vc\0"
+  strncpy (new_vcfname, paramv[0], vcfnamesz - 4);
+
+  // adiciona o null terminator que não foi colocado
+  new_vcfname[vcfnamesz - 4] = '\0';
+
+  // adiciona _z.vc ao novo nome
+  strcat (new_vcfname, "_z.vc");
+
+  // abre o novo .vc
+  if (!(new_vcfp = fopen (new_vcfname, "wb+")))
+    fatal ("erro: falha ao abrir o arquivo '%s'", new_vcfname);
+
+  // escreve os membros selecionados no novo .vc
+  for (uint32_t i = 0; i < new_dir.memc; i++)
+    {
+      unsigned char *buffer;
+      struct member *oldmem, *newmem;
+
+      oldmem = &dir.memv[idxv[i]];
+      newmem = &new_dir.memv[i];
+
+      // aloca o buffer
+      if (!(buffer = malloc (oldmem->dsz)))
+        fatal ("erro: falha ao alocar memória para copiar '%s'", oldmem->name);
+
+      // vai ate o offset de leitura
+      if (fseek (vcfp, oldmem->offset, SEEK_SET) != 0)
+        fatal ("erro: falha ao manipular o arquivo '%s'", paramv[0]);
+
+      // le o arquivo do membro
+      if (fread (buffer, oldmem->dsz, 1, vcfp) != 1)
+        fatal ("erro: falha ao ler o arquivo do membro '%s'", oldmem->name);
+
+      // vai ate o offset de escrita
+      if (fseek (new_vcfp, newmem->offset, SEEK_SET) != 0)
+        fatal ("erro: falha ao manipular o arquivo '%s'", new_vcfname);
+
+      // escreve o arquivo do membro
+      if (fwrite (buffer, newmem->dsz, 1, new_vcfp) != 1)
+        fatal ("erro: falha ao escrever o arquivo do membro '%s'", newmem->name);
+
+      free (buffer);
+    }
+
+  // grava o diretório no fim do arquivo
+  if (write_dir (&new_dir, new_vcfp) != 0)
+    fatal ("erro: falha ao gravar o diretório no arquivo '%s'", new_vcfname);
+
+  free (new_vcfname);
+  free (idxv);
+  free (dir.memv);
+  free (new_dir.memv);
+  fclose (vcfp);
+  fclose (new_vcfp);
+}

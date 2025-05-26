@@ -23,4 +23,7 @@ void r (int paramc, char **paramv);
 /* imprime membros */
 void c (int paramc, char **paramv);
 
+/* derivação */
+void z (int paramc, char **paramv);
+
 #endif /* vcopr.h */
