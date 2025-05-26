@@ -1,0 +1,25 @@
+Autor: Pedro Henrique Friedrich Ramos (GRR 20243133)
+
+Arquivos:
+.
+|-- Makefile
+|-- lz              -> Arquivos da biblioteca de compressão
+|   |-- lz.c
+|   `-- lz.h
+|-- vc              -> Biblioteca interna do vinac
+|   |-- vcdef.h     -> Definição das estruturas
+|   |-- vcdir.c
+|   |-- vcdir.h     -> Subrotinas para manipular o diretório
+|   |-- vcopr.c
+|   `-- vcopr.h     -> Operações sobre o arquivo .vc
+`-- vinac.c         -> main
+
+A estrutura usada é um array dinâmico de structs member para representar o
+diretório.
+
+A reorganização de membros no arquivo é feita por meio de operações de
+truncamento e deslocamento de blocos em disco (shift_memfs), juntamente de
+atualização de índices no vetor de diretório (shift_mempos), sem uso de
+arquivos temporários.
+
+Nenhum bug conhecido.
