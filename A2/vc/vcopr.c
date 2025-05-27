@@ -769,7 +769,8 @@ z (int paramc, char **paramv)
 
       // escreve o arquivo do membro
       if (fwrite (buffer, newmem->dsz, 1, new_vcfp) != 1)
-        fatal ("erro: falha ao escrever o arquivo do membro '%s'", newmem->name);
+        fatal ("erro: falha ao escrever o arquivo do membro '%s'",
+               newmem->name);
 
       free (buffer);
     }
