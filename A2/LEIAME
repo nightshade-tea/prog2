@@ -23,3 +23,34 @@ atualização de índices no vetor de diretório (shift_mempos), sem uso de
 arquivos temporários.
 
 Nenhum bug conhecido.
+
+-------------------------------------------------------------------------------
+
+Para adicionar a operação de derivação (-z), foram alterados os arquivos:
+
+  - vinac.c : A main () foi modificada para que a flag -z seja aceita e chame
+               a função z (), implementada em vc/vcopr.c
+
+  - vc/vcopr.h : Foi adicionado o protótipo da função z ()
+
+  - vc/vcopr.c : Foi adicionado a implementação da função z ()
+
+
+A função z () pode ser resumida nas seguintes etapas:
+  1. Aloca e inicializa a struct diretório para o arquivo derivado
+
+  2. Copia diretamente os arquivos dos membros do arquivo original para o
+      arquivo derivado, sem descomprimir
+
+  3. Escreve o diretório do arquivo derivado no final
+
+
+Alguns detalhes de implementação:
+  - Foi usado um vetor auxiliar de índices (idxv) que mapeia o índice de um
+     membro no arquivo derivado para seu índice correspondente no arquivo
+     original
+
+  - Os offsets dos membros selecionados são recalculados ao mesmo tempo que o
+     vetor de índices é construído
+
+- phfr24
