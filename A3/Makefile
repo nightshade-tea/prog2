@@ -1,16 +1,17 @@
 #--- CONFIG ---
 
-MAIN			:= pato
-CC				:= gcc
-CFLAGS		:= -Wall -Wextra -g -I.
-LDLIBS		:=
+MAIN		:= pato
+CC			:= gcc
+CFLAGS		:= -Wall -Wextra -g -I. \
+			   $$(pkg-config --cflags allegro-5 allegro_main-5 allegro_font-5)
+LDLIBS		:= $$(pkg-config --libs allegro-5 allegro_main-5 allegro_font-5)
 
 SRC_DIRS	:= .
 OBJ_DIR		:= obj
 
 HEADERS		:= $(wildcard $(addsuffix /*.h,$(SRC_DIRS)))
-SRCS			:= $(wildcard $(addsuffix /*.c,$(SRC_DIRS)))
-OBJS			:= $(patsubst %.c,$(OBJ_DIR)/%.o,$(SRCS))
+SRCS		:= $(wildcard $(addsuffix /*.c,$(SRC_DIRS)))
+OBJS		:= $(patsubst %.c,$(OBJ_DIR)/%.o,$(SRCS))
 
 
 #--- BUILD RULES ---
@@ -26,14 +27,9 @@ $(OBJ_DIR)/%.o: %.c
 #--- PHONY ---
 
 format:
-	clang-format -i -style=gnu \
-		$(SRCS) $(HEADERS)
-
-valgrind: $(MAIN)
-	valgrind --leak-check=full --track-origins=yes \
-		./$(MAIN)
+	clang-format -i -style=gnu $(SRCS) $(HEADERS)
 
 clean:
 	rm -rf $(OBJ_DIR) $(MAIN)
 
-.PHONY: format valgrind clean
+.PHONY: format clean
