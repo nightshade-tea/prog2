@@ -6,7 +6,7 @@ CFLAGS		:= -Wall -Wextra -g -I. \
 			   $$(pkg-config --cflags allegro-5 allegro_main-5 allegro_font-5)
 LDLIBS		:= $$(pkg-config --libs allegro-5 allegro_main-5 allegro_font-5)
 
-SRC_DIRS	:= .
+SRC_DIRS	:= . lib
 OBJ_DIR		:= obj
 
 HEADERS		:= $(wildcard $(addsuffix /*.h,$(SRC_DIRS)))

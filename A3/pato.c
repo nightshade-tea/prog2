@@ -1,7 +1,7 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 
-#include "common.h"
+#include "lib/common.h"
 
 #define FPS 30.0
 #define RES_X 640
