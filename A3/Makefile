@@ -2,9 +2,9 @@
 
 MAIN		:= pato
 CC			:= gcc
-CFLAGS		:= -Wall -Wextra -g -I. \
-			   $$(pkg-config --cflags allegro-5 allegro_main-5 allegro_font-5)
-LDLIBS		:= $$(pkg-config --libs allegro-5 allegro_main-5 allegro_font-5)
+ALLIBS		:= allegro-5 allegro_main-5 allegro_font-5 allegro_image-5
+CFLAGS		:= -Wall -Wextra -g $$(pkg-config --cflags $(ALLIBS))
+LDLIBS		:= $$(pkg-config --libs $(ALLIBS))
 
 SRC_DIRS	:= . lib
 OBJ_DIR		:= obj

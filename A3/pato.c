@@ -1,5 +1,6 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_image.h>
 
 #include "lib/common.h"
 
@@ -15,17 +16,21 @@ main ()
   ALLEGRO_DISPLAY *disp;
   ALLEGRO_FONT *font;
   ALLEGRO_EVENT event;
+  ALLEGRO_BITMAP *mysha;
 
   bool redraw = true;
   bool done = false;
 
   ensure (al_init ());
   ensure (al_install_keyboard ());
+  ensure (al_init_image_addon ());
+
+  ensure (font = al_create_builtin_font ());
+  ensure (mysha = al_load_bitmap ("assets/mysha.png"));
 
   ensure (timer = al_create_timer (1.0 / FPS));
   ensure (queue = al_create_event_queue ());
   ensure (disp = al_create_display (RES_X, RES_Y));
-  ensure (font = al_create_builtin_font ());
 
   al_register_event_source (queue, al_get_keyboard_event_source ());
   al_register_event_source (queue, al_get_display_event_source (disp));
@@ -60,6 +65,7 @@ main ()
         }
     }
 
+  al_destroy_bitmap (mysha);
   al_destroy_font (font);
   al_destroy_display (disp);
   al_destroy_timer (timer);

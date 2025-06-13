@@ -1,4 +1,4 @@
-#include <errno.h>
+// #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,10 +14,11 @@ fatal (const char *format, ...)
   vfprintf (stderr, format, args);
   va_end (args);
 
-  if (errno)
-    perror (" :");
-  else
-    fprintf (stderr, "\n");
+  //  if (errno)
+  //    perror (" :");
+  //  else
+
+  fprintf (stderr, "\n");
 
   exit (1);
 }
