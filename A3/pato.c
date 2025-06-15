@@ -17,11 +17,13 @@
  * +-----------(x2, y2) */
 typedef struct OBJECT
 {
-  int x1, y1;   // upper left point
-  int x2, y2;   // lower right point
-  int xsz, ysz; // x2 - x1, y2 - y1
-  int vx, vy;   // movement speed vector
-  ALLEGRO_COLOR color;
+  float x1, y1;         // upper left point
+  float x2, y2;         // lower right point
+  float xsz, ysz;       // x2 - x1, y2 - y1
+  float vx, vy;         // movement speed vector
+  float thck;           // border thickness
+  ALLEGRO_COLOR fill;   // fill color
+  ALLEGRO_COLOR border; // border color
 } OBJECT;
 
 int
@@ -42,22 +44,26 @@ main ()
   ensure (al_init ());
   ensure (al_install_keyboard ());
   ensure (al_init_image_addon ());
+  al_set_new_display_option (ALLEGRO_SINGLE_BUFFER, 1, ALLEGRO_REQUIRE);
 
   ensure (font = al_create_builtin_font ());
 
-  obj.xsz = (RES_X / 10) + rand () % (RES_X / 10);
-  obj.ysz = (RES_Y / 10) + rand () % (RES_Y / 10);
-  obj.x1 = rand () % (RES_X - obj.xsz);
-  obj.y1 = rand () % (RES_Y - obj.ysz);
+  obj.xsz = (RES_X / 20) + rand () % (RES_X / 10);
+  obj.ysz = (RES_Y / 20) + rand () % (RES_Y / 10);
+  obj.x1 = rand () % (RES_X - (int)obj.xsz);
+  obj.y1 = rand () % (RES_Y - (int)obj.ysz);
   obj.x2 = obj.x1 + obj.xsz;
   obj.y2 = obj.y1 + obj.ysz;
-  obj.vx = rand () % (RES_X / 70);
-  obj.vy = rand () % (RES_Y / 70);
-  obj.color = al_map_rgb (0, 0, 255);
+  obj.vx = (RES_X / 140) + rand () % (RES_X / 140);
+  obj.vy = (RES_Y / 140) + rand () % (RES_Y / 140);
+  obj.thck = 2;
+  obj.fill = al_map_rgb (0, 0, 255);
+  obj.border = al_map_rgb (255, 0, 0);
 
   ensure (timer = al_create_timer (1.0 / FPS));
   ensure (queue = al_create_event_queue ());
   ensure (disp = al_create_display (RES_X, RES_Y));
+  al_clear_to_color (al_map_rgb (0, 0, 0));
 
   al_register_event_source (queue, al_get_keyboard_event_source ());
   al_register_event_source (queue, al_get_display_event_source (disp));
@@ -108,7 +114,7 @@ main ()
           redraw = true;
           break;
 
-        case ALLEGRO_EVENT_KEY_DOWN:
+//      case ALLEGRO_EVENT_KEY_DOWN:
         case ALLEGRO_EVENT_DISPLAY_CLOSE:
           done = true;
           continue;
@@ -116,11 +122,11 @@ main ()
 
       if (redraw && al_is_event_queue_empty (queue))
         {
-          al_clear_to_color (al_map_rgb (0, 0, 0));
-
-          al_draw_text (font, al_map_rgb (255, 255, 255), 10, 10,
-                        ALLEGRO_ALIGN_LEFT, "pato sapato v0.1");
-          al_draw_filled_rectangle (obj.x1, obj.y1, obj.x2, obj.y2, obj.color);
+//        al_draw_text (font, al_map_rgb (255, 255, 255), 10, 10,
+//                      ALLEGRO_ALIGN_LEFT, "pato sapato v0.1");
+          al_draw_filled_rectangle (obj.x1, obj.y1, obj.x2, obj.y2, obj.fill);
+          al_draw_rectangle (obj.x1, obj.y1, obj.x2, obj.y2, obj.border,
+                             obj.thck);
 
           al_flip_display ();
           redraw = false;
