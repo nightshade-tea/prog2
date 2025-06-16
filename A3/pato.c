@@ -3,24 +3,43 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
+#include <math.h>
+
 #include "lib/common.h"
 #include "lib/keyboard.h"
 
-#define FPS 60.0
 #define RENDER_WIDTH 320
 #define RENDER_HEIGHT 200
+#define FPS 60.0
+#define GRAV 1.25 / (FPS / 30)
 
-/* (x1, y1) ----------+
- * |                  |
- * |                  |
- * +-----------(x2, y2) */
+typedef struct PAIR
+{
+  float x, y;
+} PAIR;
+
+/* p ----------+
+ * | \         |
+ * |   \       |
+ * |    sz     |
+ * |       \   |
+ * |         \ |
+ * +-----------q */
 typedef struct OBJECT
 {
-  float x1, y1;         // upper left point
-  float x2, y2;         // lower right point
-  float xsz, ysz;       // x2 - x1, y2 - y1
-  float vx, vy;         // movement speed vector
-  float thck;           // border thickness
+  PAIR p, q; // upper left and bottom right points
+  PAIR sz;   // size vector (q.x - p.x, q.y - p.y)
+  PAIR vel;  // velocity vector
+  PAIR acc;  // acceleration vector
+
+  float crouchspd; // crouched speed
+  float walkspd;   // walking speed
+  float runspd;    // running speed
+  float slowdown;  // x axis slowdown acceleration
+  float jmpspd;    // jump speed
+  float glidespd;  // plane speed
+  float thck;      // border thickness
+
   ALLEGRO_COLOR fill;   // fill color
   ALLEGRO_COLOR border; // border color
 } OBJECT;
@@ -28,15 +47,25 @@ typedef struct OBJECT
 void
 obj_init (OBJECT *obj)
 {
-  obj->xsz = obj->ysz = (RENDER_WIDTH / RENDER_HEIGHT) * 10;
+  obj->sz.x = obj->sz.y = (RENDER_WIDTH / RENDER_HEIGHT) * 10;
 
-  obj->x1 = (RENDER_WIDTH - obj->xsz) / 2;
-  obj->y1 = (RENDER_HEIGHT - obj->ysz) / 2;
+  obj->p.x = (RENDER_WIDTH - obj->sz.x) / 2;
+  obj->p.y = (RENDER_HEIGHT - obj->sz.y) / 2;
 
-  obj->x2 = obj->x1 + obj->xsz;
-  obj->y2 = obj->y1 + obj->ysz;
+  obj->q.x = obj->p.x + obj->sz.x;
+  obj->q.y = obj->p.y + obj->sz.y;
 
-  obj->vx = obj->vy = (obj->xsz / 4) / (FPS / 30);
+  obj->vel.x = obj->vel.y = 0;
+  obj->acc.x = 0;
+  obj->acc.y = GRAV;
+
+  obj->runspd = (obj->sz.x * 0.75) / (FPS / 30);
+  obj->walkspd = obj->runspd / 1.5;
+  obj->crouchspd = obj->runspd / 2;
+
+  obj->slowdown = obj->walkspd / 20;
+  obj->jmpspd = (obj->sz.y * 1.375) / (FPS / 30);
+  obj->glidespd = GRAV * 1.375;
 
   obj->thck = 1;
   obj->fill = al_map_rgb (0, 0, 255);
@@ -46,56 +75,67 @@ obj_init (OBJECT *obj)
 void
 obj_update_position (OBJECT *obj, KEYBOARD key[ALLEGRO_KEY_MAX])
 {
-  if (key[ALLEGRO_KEY_UP])
+  if (fabs (obj->vel.x) <= 2 * obj->slowdown)
     {
-      obj->y1 -= obj->vy;
-      obj->y2 -= obj->vy;
+      obj->acc.x = 0;
+      obj->vel.x = 0;
     }
+  else if (obj->vel.x > 0)
+    obj->acc.x = -obj->slowdown;
+  else
+    obj->acc.x = obj->slowdown;
 
-  if (key[ALLEGRO_KEY_DOWN])
+  if (obj->vel.y >= obj->glidespd && (key[ALLEGRO_KEY_SPACE] & KEY_DOWN))
     {
-      obj->y1 += obj->vy;
-      obj->y2 += obj->vy;
+      obj->acc.y = 0;
+      obj->vel.y = obj->glidespd;
     }
+  else
+    obj->acc.y = GRAV;
 
-  if (key[ALLEGRO_KEY_LEFT])
-    {
-      obj->x1 -= obj->vx;
-      obj->x2 -= obj->vx;
-    }
+  obj->vel.x += obj->acc.x;
+  obj->vel.y += obj->acc.y;
 
-  if (key[ALLEGRO_KEY_RIGHT])
-    {
-      obj->x1 += obj->vx;
-      obj->x2 += obj->vx;
-    }
+  if (key[ALLEGRO_KEY_SPACE] & KEY_SEEN)
+    obj->vel.y = -obj->jmpspd;
+
+  if (key[ALLEGRO_KEY_A])
+    obj->vel.x = -obj->walkspd;
+
+  if (key[ALLEGRO_KEY_D])
+    obj->vel.x = obj->walkspd;
+
+  obj->p.x += obj->vel.x;
+  obj->q.x += obj->vel.x;
+  obj->p.y += obj->vel.y;
+  obj->q.y += obj->vel.y;
 }
 
 void
 obj_keep_inside_bounds (OBJECT *obj)
 {
-  if (obj->x1 < 0.5)
+  if (obj->p.x < 0.5)
     {
-      obj->x1 = 0.5;
-      obj->x2 = obj->x1 + obj->xsz;
+      obj->p.x = 0.5;
+      obj->q.x = obj->p.x + obj->sz.x;
     }
 
-  else if (obj->x2 > RENDER_WIDTH - 0.5)
+  else if (obj->q.x > RENDER_WIDTH - 0.5)
     {
-      obj->x2 = RENDER_WIDTH - 0.5;
-      obj->x1 = obj->x2 - obj->xsz;
+      obj->q.x = RENDER_WIDTH - 0.5;
+      obj->p.x = obj->q.x - obj->sz.x;
     }
 
-  if (obj->y1 < 0.5)
+  if (obj->p.y < 0.5)
     {
-      obj->y1 = 0.5;
-      obj->y2 = obj->y1 + obj->ysz;
+      obj->p.y = 0.5;
+      obj->q.y = obj->p.y + obj->sz.y;
     }
 
-  else if (obj->y2 > RENDER_HEIGHT - 0.5)
+  else if (obj->q.y > RENDER_HEIGHT - 0.5)
     {
-      obj->y2 = RENDER_HEIGHT - 0.5;
-      obj->y1 = obj->y2 - obj->ysz;
+      obj->q.y = RENDER_HEIGHT - 0.5;
+      obj->p.y = obj->q.y - obj->sz.y;
     }
 }
 
@@ -155,7 +195,7 @@ main ()
           obj_update_position (&obj, key);
           obj_keep_inside_bounds (&obj);
 
-          if (key[ALLEGRO_KEY_ESCAPE])
+          if (key[ALLEGRO_KEY_ESCAPE] || key[ALLEGRO_KEY_Q])
             done = true;
 
           kbd_reset_seen (key);
@@ -179,8 +219,9 @@ main ()
       if (redraw && al_is_event_queue_empty (queue))
         {
           al_clear_to_color (al_map_rgb (0, 0, 0));
-          al_draw_filled_rectangle (obj.x1, obj.y1, obj.x2, obj.y2, obj.fill);
-          al_draw_rectangle (obj.x1, obj.y1, obj.x2, obj.y2, obj.border,
+          al_draw_filled_rectangle (obj.p.x, obj.p.y, obj.q.x, obj.q.y,
+                                    obj.fill);
+          al_draw_rectangle (obj.p.x, obj.p.y, obj.q.x, obj.q.y, obj.border,
                              obj.thck);
 
           //        al_draw_text (font, al_map_rgb (255, 255, 255), 10, 10,
@@ -188,8 +229,8 @@ main ()
 
           al_draw_textf (font, al_map_rgb (255, 255, 255), 0, 0,
                          ALLEGRO_ALIGN_LEFT,
-                         "(x1=%.1f y1=%.1f) (x2=%.1f y2=%.1f)", obj.x1, obj.y1,
-                         obj.x2, obj.y2);
+                         "p.x=%05.1f p.y=%05.1f q.x=%05.1f q.y=%05.1f",
+                         obj.p.x, obj.p.y, obj.q.x, obj.q.y);
 
           al_flip_display ();
           redraw = false;

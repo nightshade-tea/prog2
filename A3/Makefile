@@ -6,7 +6,7 @@ ALLIBS		:= allegro-5 allegro_main-5 allegro_font-5 allegro_image-5 \
 			   allegro_primitives-5
 CFLAGS		:= -Wall -Wextra -O3 -march=native \
 			   $$(pkg-config --cflags $(ALLIBS))
-LDLIBS		:= $$(pkg-config --libs $(ALLIBS))
+LDLIBS		:= -lm $$(pkg-config --libs $(ALLIBS))
 
 SRC_DIRS	:= . lib
 OBJ_DIR		:= obj
