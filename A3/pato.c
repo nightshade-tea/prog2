@@ -3,9 +3,8 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
-#include <time.h>
-
 #include "lib/common.h"
+#include "lib/keyboard.h"
 
 #define FPS 60.0
 #define RENDER_WIDTH 320
@@ -27,25 +26,77 @@ typedef struct OBJECT
 } OBJECT;
 
 void
-init_obj (OBJECT *obj)
+obj_init (OBJECT *obj)
 {
-  obj->xsz = (RENDER_WIDTH / 20) + rand () % (RENDER_WIDTH / 20);
-  obj->ysz = (RENDER_HEIGHT / 20) + rand () % (RENDER_HEIGHT / 20);
+  obj->xsz = obj->ysz = (RENDER_WIDTH / RENDER_HEIGHT) * 10;
 
-  obj->x1 = rand () % (RENDER_WIDTH - (int)obj->xsz);
-  obj->y1 = rand () % (RENDER_HEIGHT - (int)obj->ysz);
+  obj->x1 = (RENDER_WIDTH - obj->xsz) / 2;
+  obj->y1 = (RENDER_HEIGHT - obj->ysz) / 2;
 
   obj->x2 = obj->x1 + obj->xsz;
   obj->y2 = obj->y1 + obj->ysz;
 
-  obj->vx = (RENDER_WIDTH / 140) + rand () % (RENDER_WIDTH / 140);
-  obj->vy = (RENDER_HEIGHT / 140) + rand () % (RENDER_HEIGHT / 140);
-  obj->vx /= FPS / 30;
-  obj->vy /= FPS / 30;
+  obj->vx = obj->vy = (obj->xsz / 4) / (FPS / 30);
 
   obj->thck = 1;
-  obj->fill = al_map_rgb (50, 50, 50);
+  obj->fill = al_map_rgb (0, 0, 255);
   obj->border = al_map_rgb (255, 0, 0);
+}
+
+void
+obj_update_position (OBJECT *obj, KEYBOARD key[ALLEGRO_KEY_MAX])
+{
+  if (key[ALLEGRO_KEY_UP])
+    {
+      obj->y1 -= obj->vy;
+      obj->y2 -= obj->vy;
+    }
+
+  if (key[ALLEGRO_KEY_DOWN])
+    {
+      obj->y1 += obj->vy;
+      obj->y2 += obj->vy;
+    }
+
+  if (key[ALLEGRO_KEY_LEFT])
+    {
+      obj->x1 -= obj->vx;
+      obj->x2 -= obj->vx;
+    }
+
+  if (key[ALLEGRO_KEY_RIGHT])
+    {
+      obj->x1 += obj->vx;
+      obj->x2 += obj->vx;
+    }
+}
+
+void
+obj_keep_inside_bounds (OBJECT *obj)
+{
+  if (obj->x1 < 0.5)
+    {
+      obj->x1 = 0.5;
+      obj->x2 = obj->x1 + obj->xsz;
+    }
+
+  else if (obj->x2 > RENDER_WIDTH - 0.5)
+    {
+      obj->x2 = RENDER_WIDTH - 0.5;
+      obj->x1 = obj->x2 - obj->xsz;
+    }
+
+  if (obj->y1 < 0.5)
+    {
+      obj->y1 = 0.5;
+      obj->y2 = obj->y1 + obj->ysz;
+    }
+
+  else if (obj->y2 > RENDER_HEIGHT - 0.5)
+    {
+      obj->y2 = RENDER_HEIGHT - 0.5;
+      obj->y1 = obj->y2 - obj->ysz;
+    }
 }
 
 int
@@ -59,19 +110,22 @@ main ()
   ALLEGRO_FONT *font;
 
   OBJECT obj;
+  KEYBOARD key[ALLEGRO_KEY_MAX];
   float scalex, scaley;
   bool redraw = true;
   bool done = false;
 
-  srand (time (NULL));
-  init_obj (&obj);
+  obj_init (&obj);
+  kbd_init (key);
 
   ensure (al_init ());
   ensure (al_install_keyboard ());
+  ensure (al_init_font_addon ());
   ensure (al_init_image_addon ());
+  ensure (al_init_primitives_addon ());
 
   al_set_new_display_flags (ALLEGRO_FULLSCREEN_WINDOW);
-//al_set_new_display_option (ALLEGRO_SINGLE_BUFFER, 1, ALLEGRO_REQUIRE);
+  // al_set_new_display_option (ALLEGRO_SINGLE_BUFFER, 1, ALLEGRO_REQUIRE);
 
   ensure (font = al_create_builtin_font ());
   ensure (timer = al_create_timer (1.0 / FPS));
@@ -83,6 +137,7 @@ main ()
   al_identity_transform (&transf);
   al_scale_transform (&transf, scalex, scaley);
   al_use_transform (&transf);
+  al_hide_mouse_cursor (disp);
 
   al_register_event_source (queue, al_get_keyboard_event_source ());
   al_register_event_source (queue, al_get_display_event_source (disp));
@@ -97,43 +152,25 @@ main ()
       switch (event.type)
         {
         case ALLEGRO_EVENT_TIMER:
-          obj.x1 += obj.vx;
-          obj.y1 += obj.vy;
-          obj.x2 += obj.vx;
-          obj.y2 += obj.vy;
+          obj_update_position (&obj, key);
+          obj_keep_inside_bounds (&obj);
 
-          if (obj.x1 < 0)
-            {
-              obj.x1 *= -1;
-              obj.x2 = obj.x1 + obj.xsz;
-              obj.vx *= -1;
-            }
+          if (key[ALLEGRO_KEY_ESCAPE])
+            done = true;
 
-          else if (obj.x2 > RENDER_WIDTH)
-            {
-              obj.x2 = 2 * RENDER_WIDTH - obj.x2;
-              obj.x1 = obj.x2 - obj.xsz;
-              obj.vx *= -1;
-            }
-
-          if (obj.y1 < 0)
-            {
-              obj.y1 *= -1;
-              obj.y2 = obj.y1 + obj.ysz;
-              obj.vy *= -1;
-            }
-
-          else if (obj.y2 > RENDER_HEIGHT)
-            {
-              obj.y2 = 2 * RENDER_HEIGHT - obj.y2;
-              obj.y1 = obj.y2 - obj.ysz;
-              obj.vy *= -1;
-            }
+          kbd_reset_seen (key);
 
           redraw = true;
           break;
 
         case ALLEGRO_EVENT_KEY_DOWN:
+          kbd_press (key, event.keyboard.keycode);
+          break;
+
+        case ALLEGRO_EVENT_KEY_UP:
+          kbd_release (key, event.keyboard.keycode);
+          break;
+
         case ALLEGRO_EVENT_DISPLAY_CLOSE:
           done = true;
           continue;
@@ -145,8 +182,15 @@ main ()
           al_draw_filled_rectangle (obj.x1, obj.y1, obj.x2, obj.y2, obj.fill);
           al_draw_rectangle (obj.x1, obj.y1, obj.x2, obj.y2, obj.border,
                              obj.thck);
-          al_draw_text (font, al_map_rgb (255, 255, 255), 10, 10,
-                        ALLEGRO_ALIGN_LEFT, "pato sapato v0.1");
+
+          //        al_draw_text (font, al_map_rgb (255, 255, 255), 10, 10,
+          //                      ALLEGRO_ALIGN_LEFT, "pato sapato v0.1");
+
+          al_draw_textf (font, al_map_rgb (255, 255, 255), 0, 0,
+                         ALLEGRO_ALIGN_LEFT,
+                         "(x1=%.1f y1=%.1f) (x2=%.1f y2=%.1f)", obj.x1, obj.y1,
+                         obj.x2, obj.y2);
+
           al_flip_display ();
           redraw = false;
         }
