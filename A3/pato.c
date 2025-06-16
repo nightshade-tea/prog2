@@ -7,9 +7,9 @@
 
 #include "lib/common.h"
 
-#define FPS 30.0
-#define RES_X 640
-#define RES_Y 480
+#define FPS 60.0
+#define RENDER_WIDTH 320
+#define RENDER_HEIGHT 200
 
 /* (x1, y1) ----------+
  * |                  |
@@ -26,44 +26,63 @@ typedef struct OBJECT
   ALLEGRO_COLOR border; // border color
 } OBJECT;
 
+void
+init_obj (OBJECT *obj)
+{
+  obj->xsz = (RENDER_WIDTH / 20) + rand () % (RENDER_WIDTH / 20);
+  obj->ysz = (RENDER_HEIGHT / 20) + rand () % (RENDER_HEIGHT / 20);
+
+  obj->x1 = rand () % (RENDER_WIDTH - (int)obj->xsz);
+  obj->y1 = rand () % (RENDER_HEIGHT - (int)obj->ysz);
+
+  obj->x2 = obj->x1 + obj->xsz;
+  obj->y2 = obj->y1 + obj->ysz;
+
+  obj->vx = (RENDER_WIDTH / 140) + rand () % (RENDER_WIDTH / 140);
+  obj->vy = (RENDER_HEIGHT / 140) + rand () % (RENDER_HEIGHT / 140);
+  obj->vx /= FPS / 30;
+  obj->vy /= FPS / 30;
+
+  obj->thck = 1;
+  obj->fill = al_map_rgb (50, 50, 50);
+  obj->border = al_map_rgb (255, 0, 0);
+}
+
 int
 main ()
 {
   ALLEGRO_TIMER *timer;
   ALLEGRO_EVENT_QUEUE *queue;
   ALLEGRO_DISPLAY *disp;
+  ALLEGRO_TRANSFORM transf;
   ALLEGRO_EVENT event;
-
   ALLEGRO_FONT *font;
-  OBJECT obj;
 
+  OBJECT obj;
+  float scalex, scaley;
   bool redraw = true;
   bool done = false;
 
   srand (time (NULL));
+  init_obj (&obj);
+
   ensure (al_init ());
   ensure (al_install_keyboard ());
   ensure (al_init_image_addon ());
-  al_set_new_display_option (ALLEGRO_SINGLE_BUFFER, 1, ALLEGRO_REQUIRE);
+
+  al_set_new_display_flags (ALLEGRO_FULLSCREEN_WINDOW);
+//al_set_new_display_option (ALLEGRO_SINGLE_BUFFER, 1, ALLEGRO_REQUIRE);
 
   ensure (font = al_create_builtin_font ());
-
-  obj.xsz = (RES_X / 20) + rand () % (RES_X / 10);
-  obj.ysz = (RES_Y / 20) + rand () % (RES_Y / 10);
-  obj.x1 = rand () % (RES_X - (int)obj.xsz);
-  obj.y1 = rand () % (RES_Y - (int)obj.ysz);
-  obj.x2 = obj.x1 + obj.xsz;
-  obj.y2 = obj.y1 + obj.ysz;
-  obj.vx = (RES_X / 140) + rand () % (RES_X / 140);
-  obj.vy = (RES_Y / 140) + rand () % (RES_Y / 140);
-  obj.thck = 2;
-  obj.fill = al_map_rgb (0, 0, 255);
-  obj.border = al_map_rgb (255, 0, 0);
-
   ensure (timer = al_create_timer (1.0 / FPS));
   ensure (queue = al_create_event_queue ());
-  ensure (disp = al_create_display (RES_X, RES_Y));
-  al_clear_to_color (al_map_rgb (0, 0, 0));
+  ensure (disp = al_create_display (RENDER_WIDTH, RENDER_HEIGHT));
+
+  scalex = ((float)al_get_display_width (disp)) / RENDER_WIDTH;
+  scaley = ((float)al_get_display_height (disp)) / RENDER_HEIGHT;
+  al_identity_transform (&transf);
+  al_scale_transform (&transf, scalex, scaley);
+  al_use_transform (&transf);
 
   al_register_event_source (queue, al_get_keyboard_event_source ());
   al_register_event_source (queue, al_get_display_event_source (disp));
@@ -90,9 +109,9 @@ main ()
               obj.vx *= -1;
             }
 
-          else if (obj.x2 > RES_X)
+          else if (obj.x2 > RENDER_WIDTH)
             {
-              obj.x2 = 2 * RES_X - obj.x2;
+              obj.x2 = 2 * RENDER_WIDTH - obj.x2;
               obj.x1 = obj.x2 - obj.xsz;
               obj.vx *= -1;
             }
@@ -104,9 +123,9 @@ main ()
               obj.vy *= -1;
             }
 
-          else if (obj.y2 > RES_Y)
+          else if (obj.y2 > RENDER_HEIGHT)
             {
-              obj.y2 = 2 * RES_Y - obj.y2;
+              obj.y2 = 2 * RENDER_HEIGHT - obj.y2;
               obj.y1 = obj.y2 - obj.ysz;
               obj.vy *= -1;
             }
@@ -114,7 +133,7 @@ main ()
           redraw = true;
           break;
 
-//      case ALLEGRO_EVENT_KEY_DOWN:
+        case ALLEGRO_EVENT_KEY_DOWN:
         case ALLEGRO_EVENT_DISPLAY_CLOSE:
           done = true;
           continue;
@@ -122,12 +141,12 @@ main ()
 
       if (redraw && al_is_event_queue_empty (queue))
         {
-//        al_draw_text (font, al_map_rgb (255, 255, 255), 10, 10,
-//                      ALLEGRO_ALIGN_LEFT, "pato sapato v0.1");
+          al_clear_to_color (al_map_rgb (0, 0, 0));
           al_draw_filled_rectangle (obj.x1, obj.y1, obj.x2, obj.y2, obj.fill);
           al_draw_rectangle (obj.x1, obj.y1, obj.x2, obj.y2, obj.border,
                              obj.thck);
-
+          al_draw_text (font, al_map_rgb (255, 255, 255), 10, 10,
+                        ALLEGRO_ALIGN_LEFT, "pato sapato v0.1");
           al_flip_display ();
           redraw = false;
         }
