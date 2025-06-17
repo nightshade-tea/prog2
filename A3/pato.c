@@ -40,7 +40,6 @@ typedef struct OBJECT
   float glidespd;  // plane speed
   float thck;      // border thickness
 
-  ALLEGRO_COLOR fill;   // fill color
   ALLEGRO_COLOR border; // border color
 } OBJECT;
 
@@ -69,7 +68,6 @@ obj_init (OBJECT *obj)
   obj->glidespd = GRAV * 2;
 
   obj->thck = 1;
-  obj->fill = al_map_rgb (0, 0, 255);
   obj->border = al_map_rgb (255, 0, 0);
 }
 
@@ -150,6 +148,12 @@ main ()
   ALLEGRO_EVENT event;
   ALLEGRO_FONT *font;
 
+  // -------------------------------------------------------------------------
+  ALLEGRO_BITMAP *idle;
+  unsigned char idle_state = 0;
+  unsigned char frame_counter = 0;
+  // -------------------------------------------------------------------------
+
   OBJECT obj;
   KEYBOARD key[ALLEGRO_KEY_MAX];
   float scalex, scaley;
@@ -167,6 +171,8 @@ main ()
 
   al_set_new_display_flags (ALLEGRO_FULLSCREEN_WINDOW);
   // al_set_new_display_option (ALLEGRO_SINGLE_BUFFER, 1, ALLEGRO_REQUIRE);
+
+  ensure (idle = al_load_bitmap ("assets/duck/23x20/idle.png"));
 
   ensure (font = al_create_builtin_font ());
   ensure (timer = al_create_timer (1.0 / FPS));
@@ -201,6 +207,15 @@ main ()
 
           kbd_reset_seen (key);
 
+          frame_counter++;
+          frame_counter %= (int)(3 * (FPS / 30));
+
+          if (!frame_counter)
+            {
+              idle_state++;
+              idle_state %= 4;
+            }
+
           redraw = true;
           break;
 
@@ -220,10 +235,15 @@ main ()
       if (redraw && al_is_event_queue_empty (queue))
         {
           al_clear_to_color (al_map_rgb (0, 0, 0));
-          al_draw_filled_rectangle (obj.p.x, obj.p.y, obj.q.x, obj.q.y,
-                                    obj.fill);
+          //        al_draw_filled_rectangle (obj.p.x, obj.p.y, obj.q.x,
+          //        obj.q.y,
+          //                                  obj.fill);
+
           al_draw_rectangle (obj.p.x, obj.p.y, obj.q.x, obj.q.y, obj.border,
                              obj.thck);
+
+          al_draw_bitmap_region (idle, idle_state * 23, 0,
+                                 23, 20, obj.p.x, obj.p.y, 0);
 
           //        al_draw_text (font, al_map_rgb (255, 255, 255), 10, 10,
           //                      ALLEGRO_ALIGN_LEFT, "pato sapato v0.1");
