@@ -8,10 +8,10 @@
 #include "lib/common.h"
 #include "lib/keyboard.h"
 
-#define RENDER_WIDTH 320
-#define RENDER_HEIGHT 200
+#define RENDER_WIDTH 480
+#define RENDER_HEIGHT 300
 #define FPS 60.0
-#define GRAV 1.25 / (FPS / 30)
+#define GRAV 2 / (FPS / 30)
 
 typedef struct PAIR
 {
@@ -47,7 +47,8 @@ typedef struct OBJECT
 void
 obj_init (OBJECT *obj)
 {
-  obj->sz.x = obj->sz.y = (RENDER_WIDTH / RENDER_HEIGHT) * 10;
+  obj->sz.x = 23;
+  obj->sz.y = 20;
 
   obj->p.x = (RENDER_WIDTH - obj->sz.x) / 2;
   obj->p.y = (RENDER_HEIGHT - obj->sz.y) / 2;
@@ -60,12 +61,12 @@ obj_init (OBJECT *obj)
   obj->acc.y = GRAV;
 
   obj->runspd = (obj->sz.x * 0.75) / (FPS / 30);
-  obj->walkspd = obj->runspd / 1.5;
-  obj->crouchspd = obj->runspd / 2;
+  obj->walkspd = obj->runspd / 2;
+  obj->crouchspd = obj->runspd / 4;
 
   obj->slowdown = obj->walkspd / 20;
-  obj->jmpspd = (obj->sz.y * 1.375) / (FPS / 30);
-  obj->glidespd = GRAV * 1.375;
+  obj->jmpspd = (obj->sz.y * 1.25) / (FPS / 30);
+  obj->glidespd = GRAV * 2;
 
   obj->thck = 1;
   obj->fill = al_map_rgb (0, 0, 255);
