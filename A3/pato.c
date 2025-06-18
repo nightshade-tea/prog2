@@ -6,137 +6,9 @@
 #include <math.h>
 
 #include "lib/common.h"
+#include "lib/def.h"
+#include "lib/duck.h"
 #include "lib/keyboard.h"
-
-#define RENDER_WIDTH 480
-#define RENDER_HEIGHT 300
-#define FPS 60.0
-#define GRAV 2 / (FPS / 30)
-
-typedef struct PAIR
-{
-  float x, y;
-} PAIR;
-
-/* p ----------+
- * | \         |
- * |   \       |
- * |    sz     |
- * |       \   |
- * |         \ |
- * +-----------q */
-typedef struct OBJECT
-{
-  PAIR p, q; // upper left and bottom right points
-  PAIR sz;   // size vector (q.x - p.x, q.y - p.y)
-  PAIR vel;  // velocity vector
-  PAIR acc;  // acceleration vector
-
-  float crouchspd; // crouched speed
-  float walkspd;   // walking speed
-  float runspd;    // running speed
-  float slowdown;  // x axis slowdown acceleration
-  float jmpspd;    // jump speed
-  float glidespd;  // plane speed
-  float thck;      // border thickness
-
-  ALLEGRO_COLOR border; // border color
-} OBJECT;
-
-void
-obj_init (OBJECT *obj)
-{
-  obj->sz.x = 23;
-  obj->sz.y = 20;
-
-  obj->p.x = (RENDER_WIDTH - obj->sz.x) / 2;
-  obj->p.y = (RENDER_HEIGHT - obj->sz.y) / 2;
-
-  obj->q.x = obj->p.x + obj->sz.x;
-  obj->q.y = obj->p.y + obj->sz.y;
-
-  obj->vel.x = obj->vel.y = 0;
-  obj->acc.x = 0;
-  obj->acc.y = GRAV;
-
-  obj->runspd = (obj->sz.x * 0.75) / (FPS / 30);
-  obj->walkspd = obj->runspd / 2;
-  obj->crouchspd = obj->runspd / 4;
-
-  obj->slowdown = obj->walkspd / 20;
-  obj->jmpspd = (obj->sz.y * 1.25) / (FPS / 30);
-  obj->glidespd = GRAV * 2;
-
-  obj->thck = 1;
-  obj->border = al_map_rgb (255, 0, 0);
-}
-
-void
-obj_update_position (OBJECT *obj, KEYBOARD key[ALLEGRO_KEY_MAX])
-{
-  if (fabs (obj->vel.x) <= 2 * obj->slowdown)
-    {
-      obj->acc.x = 0;
-      obj->vel.x = 0;
-    }
-  else if (obj->vel.x > 0)
-    obj->acc.x = -obj->slowdown;
-  else
-    obj->acc.x = obj->slowdown;
-
-  if (obj->vel.y >= obj->glidespd && (key[ALLEGRO_KEY_SPACE] & KEY_DOWN))
-    {
-      obj->acc.y = 0;
-      obj->vel.y = obj->glidespd;
-    }
-  else
-    obj->acc.y = GRAV;
-
-  obj->vel.x += obj->acc.x;
-  obj->vel.y += obj->acc.y;
-
-  if (key[ALLEGRO_KEY_SPACE] & KEY_SEEN)
-    obj->vel.y = -obj->jmpspd;
-
-  if (key[ALLEGRO_KEY_A])
-    obj->vel.x = -obj->walkspd;
-
-  if (key[ALLEGRO_KEY_D])
-    obj->vel.x = obj->walkspd;
-
-  obj->p.x += obj->vel.x;
-  obj->q.x += obj->vel.x;
-  obj->p.y += obj->vel.y;
-  obj->q.y += obj->vel.y;
-}
-
-void
-obj_keep_inside_bounds (OBJECT *obj)
-{
-  if (obj->p.x < 0.5)
-    {
-      obj->p.x = 0.5;
-      obj->q.x = obj->p.x + obj->sz.x;
-    }
-
-  else if (obj->q.x > RENDER_WIDTH - 0.5)
-    {
-      obj->q.x = RENDER_WIDTH - 0.5;
-      obj->p.x = obj->q.x - obj->sz.x;
-    }
-
-  if (obj->p.y < 0.5)
-    {
-      obj->p.y = 0.5;
-      obj->q.y = obj->p.y + obj->sz.y;
-    }
-
-  else if (obj->q.y > RENDER_HEIGHT - 0.5)
-    {
-      obj->q.y = RENDER_HEIGHT - 0.5;
-      obj->p.y = obj->q.y - obj->sz.y;
-    }
-}
 
 int
 main ()
@@ -154,13 +26,13 @@ main ()
   unsigned char frame_counter = 0;
   // -------------------------------------------------------------------------
 
-  OBJECT obj;
+  ENTITY *duck;
   KEYBOARD key[ALLEGRO_KEY_MAX];
   float scalex, scaley;
   bool redraw = true;
   bool done = false;
 
-  obj_init (&obj);
+  ensure (duck = duck_create ());
   kbd_init (key);
 
   ensure (al_init ());
@@ -170,7 +42,6 @@ main ()
   ensure (al_init_primitives_addon ());
 
   al_set_new_display_flags (ALLEGRO_FULLSCREEN_WINDOW);
-  // al_set_new_display_option (ALLEGRO_SINGLE_BUFFER, 1, ALLEGRO_REQUIRE);
 
   ensure (idle = al_load_bitmap ("assets/duck/23x20/idle.png"));
 
@@ -199,8 +70,8 @@ main ()
       switch (event.type)
         {
         case ALLEGRO_EVENT_TIMER:
-          obj_update_position (&obj, key);
-          obj_keep_inside_bounds (&obj);
+          duck_update_position (duck, key);
+          obj_keep_inside_bounds ((OBJECT *)duck);
 
           if (key[ALLEGRO_KEY_ESCAPE] || key[ALLEGRO_KEY_Q])
             done = true;
@@ -235,29 +106,24 @@ main ()
       if (redraw && al_is_event_queue_empty (queue))
         {
           al_clear_to_color (al_map_rgb (0, 0, 0));
-          //        al_draw_filled_rectangle (obj.p.x, obj.p.y, obj.q.x,
-          //        obj.q.y,
-          //                                  obj.fill);
 
-          al_draw_rectangle (obj.p.x, obj.p.y, obj.q.x, obj.q.y, obj.border,
-                             obj.thck);
+          al_draw_rectangle (duck->p.x, duck->p.y, duck->q.x, duck->q.y,
+                             al_map_rgb (255, 0, 0), 1);
 
-          al_draw_bitmap_region (idle, idle_state * 23, 0,
-                                 23, 20, obj.p.x, obj.p.y, 0);
-
-          //        al_draw_text (font, al_map_rgb (255, 255, 255), 10, 10,
-          //                      ALLEGRO_ALIGN_LEFT, "pato sapato v0.1");
+          al_draw_bitmap_region (idle, idle_state * 23, 0, 23, 20, duck->p.x,
+                                 duck->p.y, 0);
 
           al_draw_textf (font, al_map_rgb (255, 255, 255), 0, 0,
                          ALLEGRO_ALIGN_LEFT,
                          "p.x=%05.1f p.y=%05.1f q.x=%05.1f q.y=%05.1f",
-                         obj.p.x, obj.p.y, obj.q.x, obj.q.y);
+                         duck->p.x, duck->p.y, duck->q.x, duck->q.y);
 
           al_flip_display ();
           redraw = false;
         }
     }
 
+  ent_destroy (duck);
   al_destroy_font (font);
   al_destroy_display (disp);
   al_destroy_timer (timer);
