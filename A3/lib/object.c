@@ -5,7 +5,8 @@
 #include "object.h"
 
 OBJECT *
-obj_create (float px, float py, float szx, float szy)
+obj_create (float px, float py, float szx, float szy, SPRITE_ID sid,
+            unsigned char flip)
 {
   OBJECT *obj;
 
@@ -21,6 +22,9 @@ obj_create (float px, float py, float szx, float szy)
   obj->q.x = obj->p.x + obj->sz.x;
   obj->q.y = obj->p.y + obj->sz.y;
 
+  obj->sid = sid;
+  obj->flip = flip;
+
   return obj;
 }
 
@@ -30,48 +34,20 @@ obj_destroy (OBJECT *obj)
   free (obj);
 }
 
-bool
+unsigned char
 obj_collides (OBJECT *a, OBJECT *b)
 {
   if (a->p.x > b->q.x)
-    return false;
+    return 0;
 
   if (a->q.x < b->p.x)
-    return false;
+    return 0;
 
   if (a->p.y > b->q.y)
-    return false;
+    return 0;
 
   if (a->q.y < b->p.y)
-    return false;
+    return 0;
 
-  return true;
-}
-
-void
-obj_keep_inside_bounds (OBJECT *obj)
-{
-  if (obj->p.x < 0.5)
-    {
-      obj->p.x = 0.5;
-      obj->q.x = obj->p.x + obj->sz.x;
-    }
-
-  else if (obj->q.x > RENDER_WIDTH - 0.5)
-    {
-      obj->q.x = RENDER_WIDTH - 0.5;
-      obj->p.x = obj->q.x - obj->sz.x;
-    }
-
-  if (obj->p.y < 0.5)
-    {
-      obj->p.y = 0.5;
-      obj->q.y = obj->p.y + obj->sz.y;
-    }
-
-  else if (obj->q.y > RENDER_HEIGHT - 0.5)
-    {
-      obj->q.y = RENDER_HEIGHT - 0.5;
-      obj->p.y = obj->q.y - obj->sz.y;
-    }
+  return 1;
 }

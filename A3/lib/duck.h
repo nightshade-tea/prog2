@@ -3,6 +3,7 @@
 
 #include "entity.h"
 #include "keyboard.h"
+#include "sprites.h"
 
 #define DUCK_SZX 23
 #define DUCK_SZY 20
@@ -16,9 +17,11 @@
 #define DUCK_INERTIA DUCK_WALKSPD / 20
 #define DUCK_JMPSPD 25.0 / (FPS / 30)
 #define DUCK_GLIDESPD GRAV * 2
+#define DUCK_DEFAULT_SPRITE SPRITE_DUCK_IDLE
 
 ENTITY *duck_create ();
 
-void duck_update_position (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX]);
+void duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX],
+                  SPRITES *sprites);
 
 #endif /* duck.h */

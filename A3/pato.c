@@ -3,8 +3,6 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
-#include <math.h>
-
 #include "lib/common.h"
 #include "lib/def.h"
 #include "lib/duck.h"
@@ -49,6 +47,14 @@ init_display ()
   al_hide_mouse_cursor (disp);
 }
 
+static void
+init_queue ()
+{
+  al_register_event_source (queue, al_get_keyboard_event_source ());
+  al_register_event_source (queue, al_get_display_event_source (disp));
+  al_register_event_source (queue, al_get_timer_event_source (timer));
+}
+
 int
 main ()
 {
@@ -60,15 +66,13 @@ main ()
   bool done = false;
 
   init_allegro ();
+
   kbd_init (key);
   ensure (duck = duck_create ());
   ensure (sprites = sprites_load ());
 
   init_display ();
-
-  al_register_event_source (queue, al_get_keyboard_event_source ());
-  al_register_event_source (queue, al_get_display_event_source (disp));
-  al_register_event_source (queue, al_get_timer_event_source (timer));
+  init_queue ();
 
   al_start_timer (timer);
 
@@ -79,9 +83,8 @@ main ()
       switch (event.type)
         {
         case ALLEGRO_EVENT_TIMER:
-          duck_update_position (duck, key);
-          obj_keep_inside_bounds ((OBJECT *)duck);
           sprites_update (sprites);
+          duck_update (duck, key, sprites);
 
           if (key[ALLEGRO_KEY_ESCAPE] || key[ALLEGRO_KEY_Q])
             done = true;
@@ -111,8 +114,8 @@ main ()
           al_draw_rectangle (duck->p.x, duck->p.y, duck->q.x, duck->q.y,
                              al_map_rgb (255, 0, 0), 1);
 
-          al_draw_bitmap (sprites_get (sprites, SPRITE_DUCK_IDLE), duck->p.x,
-                          duck->p.y, 0);
+          al_draw_bitmap (sprites_get (sprites, duck->sid), duck->p.x,
+                          duck->p.y, duck->flip);
 
           //        al_draw_bitmap_region (idle, idle_state * 23, 0, 23, 20,
           //        duck->p.x,

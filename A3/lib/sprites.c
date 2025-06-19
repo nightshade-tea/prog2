@@ -107,3 +107,9 @@ sprites_get (SPRITES *sprites, SPRITE_ID id)
 
   return s->bmp[s->state];
 }
+
+void
+sprites_reset_state (SPRITES *sprites, SPRITE_ID id)
+{
+  sprites->spv[id].state = 0;
+}

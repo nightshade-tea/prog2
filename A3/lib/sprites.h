@@ -28,7 +28,7 @@
 #define SPRITE_DUCK_JUMP_PATH "assets/duck/jump.png"
 #define SPRITE_DUCK_JUMP_W 25
 #define SPRITE_DUCK_JUMP_H 21
-#define SPRITE_DUCK_JUMP_STATES 2
+#define SPRITE_DUCK_JUMP_STATES 4
 #define SPRITE_DUCK_JUMP_CYCLIC 0
 
 #define SPRITE_DUCK_FALL_PATH "assets/duck/fall.png"
@@ -65,7 +65,8 @@ typedef enum SPRITE_ID
   SPRITE_DUCK_CROUCH,
   SPRITE_DUCK_CRAWL,
   SPRITE_DUCK_DEATH,
-  SPRITES_NUM
+  SPRITES_NUM,
+  SPRITE_NODRAW
 } SPRITE_ID;
 
 typedef struct SPRITE
@@ -82,7 +83,6 @@ typedef struct SPRITES
 {
   SPRITE spv[SPRITES_NUM];     // sprite array
   unsigned char frame_counter; // timer for the animations framerate
-  unsigned char flip;          // draw horizontally flipped
 } SPRITES;
 
 SPRITES *sprites_load ();
@@ -93,5 +93,7 @@ void sprites_destroy (SPRITES *sprites);
 void sprites_update (SPRITES *sprites);
 
 ALLEGRO_BITMAP *sprites_get (SPRITES *sprites, SPRITE_ID id);
+
+void sprites_reset_state (SPRITES *sprites, SPRITE_ID id);
 
 #endif /* sprites.h */
