@@ -111,20 +111,20 @@ main ()
         {
           al_clear_to_color (al_map_rgb (0, 0, 0));
 
+#if DBG
           al_draw_rectangle (duck->p.x, duck->p.y, duck->q.x, duck->q.y,
                              al_map_rgb (255, 0, 0), 1);
+#endif
 
           al_draw_bitmap (sprites_get (sprites, duck->sid), duck->p.x,
                           duck->p.y, duck->flip);
 
-          //        al_draw_bitmap_region (idle, idle_state * 23, 0, 23, 20,
-          //        duck->p.x,
-          //                               duck->p.y, 0);
-
+#if DBG
           al_draw_textf (font, al_map_rgb (255, 255, 255), 0, 0,
                          ALLEGRO_ALIGN_LEFT,
                          "p.x=%05.1f p.y=%05.1f q.x=%05.1f q.y=%05.1f",
                          duck->p.x, duck->p.y, duck->q.x, duck->q.y);
+#endif
 
           al_flip_display ();
           redraw = false;
