@@ -17,8 +17,12 @@ duck_create ()
 void
 duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites)
 {
+  float ax = 0;
+  float vx = 0;
+  float threshold;
+
   // inertia
-  if (fabs (duck->v.x) <= 2 * DUCK_INERTIA)
+  if (fabs (duck->v.x) <= DUCK_INERTIA)
     duck->a.x = duck->v.x = 0;
 
   else if (duck->v.x > 0)
@@ -37,8 +41,6 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites)
   else
     duck->a.y = GRAV;
 
-  ent_update_velocity (duck);
-
   // handle keypresses
   if (key[ALLEGRO_KEY_SPACE] & KEY_SEEN)
     {
@@ -46,18 +48,74 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites)
       sprites_reset_state (sprites, SPRITE_DUCK_JUMP);
     }
 
-  if (key[ALLEGRO_KEY_A])
+  if (key[ALLEGRO_KEY_A] || key[ALLEGRO_KEY_D])
     {
-      duck->v.x = -1 * DUCK_WALKSPD;
-      duck->sid = SPRITE_DUCK_WALK;
+      if (key[ALLEGRO_KEY_S] && duck->v.y == 0)
+        {
+          ax = DUCK_CRAWLACC;
+          vx = DUCK_CRAWLSPD;
+          duck->sid = SPRITE_DUCK_CRAWL;
+        }
+
+      else if (key[ALLEGRO_KEY_LSHIFT] && duck->v.y == 0)
+        {
+          ax = DUCK_ROLLACC;
+          vx = DUCK_ROLLSPD;
+          duck->sid = SPRITE_DUCK_ROLL;
+        }
+
+      else
+        {
+          ax = DUCK_WALKACC;
+          vx = DUCK_WALKSPD;
+          duck->sid = SPRITE_DUCK_WALK;
+        }
     }
 
   if (key[ALLEGRO_KEY_D])
     {
-      duck->v.x = DUCK_WALKSPD;
-      duck->sid = SPRITE_DUCK_WALK;
+      if (duck->v.x < vx)
+        threshold = ax;
+      else
+        threshold = DUCK_INERTIA;
+
+      if (fabs (duck->v.x - vx) <= threshold)
+        {
+          duck->a.x = 0;
+          duck->v.x = vx;
+        }
+
+      else if (duck->v.x > vx)
+        duck->a.x = -1 * DUCK_INERTIA;
+
+      else
+        duck->a.x = ax;
     }
 
+  if (key[ALLEGRO_KEY_A])
+    {
+      ax *= -1;
+      vx *= -1;
+
+      if (duck->v.x < vx)
+        threshold = DUCK_INERTIA;
+      else
+        threshold = -ax;
+
+      if (fabs (duck->v.x - vx) <= threshold)
+        {
+          duck->a.x = 0;
+          duck->v.x = vx;
+        }
+
+      else if (duck->v.x < vx)
+        duck->a.x = DUCK_INERTIA;
+
+      else
+        duck->a.x = ax;
+    }
+
+  ent_update_velocity (duck);
   ent_update_position (duck);
   ent_keep_inside_bounds (duck);
 
@@ -69,8 +127,13 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites)
     duck->flip = 1;
 
   // update sprite id
-  if (duck->v.x == 0)
-    duck->sid = SPRITE_DUCK_IDLE;
+  if (duck->v.x == 0 || (!key[ALLEGRO_KEY_A] && !key[ALLEGRO_KEY_D]))
+    {
+      if (key[ALLEGRO_KEY_S])
+        duck->sid = SPRITE_DUCK_CROUCH;
+      else
+        duck->sid = SPRITE_DUCK_IDLE;
+    }
 
   if (duck->v.y < 0)
     duck->sid = SPRITE_DUCK_JUMP;
