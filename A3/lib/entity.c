@@ -56,18 +56,18 @@ ent_update_position (ENTITY *ent)
 }
 
 void
-ent_keep_inside_bounds (ENTITY *ent)
+ent_keep_inside_bounds (ENTITY *ent, CAMERA *cam)
 {
-  if (ent->p.x < 0)
+  if (ent->p.x - cam->offx < 0)
     {
-      ent->p.x = 0;
+      ent->p.x = cam->offx;
       ent->q.x = ent->p.x + ent->sz.x;
       ent->v.x = 0;
     }
 
-  else if (ent->q.x > RENDER_WIDTH)
+  else if (ent->q.x - cam->offx > RENDER_WIDTH)
     {
-      ent->q.x = RENDER_WIDTH;
+      ent->q.x = RENDER_WIDTH + cam->offx;
       ent->p.x = ent->q.x - ent->sz.x;
       ent->v.x = 0;
     }

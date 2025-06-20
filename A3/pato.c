@@ -86,14 +86,15 @@ main ()
       switch (event.type)
         {
         case ALLEGRO_EVENT_TIMER:
-          sprites_update (sprites);
-          duck_update (duck, key, sprites);
-
           if (key[ALLEGRO_KEY_ESCAPE] || key[ALLEGRO_KEY_Q])
             {
               done = true;
               continue;
             }
+
+          sprites_update (sprites);
+          duck_update (duck, key, sprites, cam);
+          cam_move (cam, (duck->p.x + duck->q.x - RENDER_WIDTH) / 2);
 
           kbd_reset_seen (key);
           cam->offx += 1 / (FPS / 30);
@@ -118,14 +119,7 @@ main ()
         {
           //        al_clear_to_color (al_map_rgb (0, 0, 0));
           cam_draw (cam);
-
-#if DBG
-          al_draw_rectangle (duck->p.x, duck->p.y, duck->q.x, duck->q.y,
-                             al_map_rgb (255, 0, 0), 1);
-#endif
-
-          al_draw_bitmap (sprites_get (sprites, duck->sid), duck->p.x,
-                          duck->p.y, duck->flip);
+          obj_draw ((OBJECT *)duck, cam, sprites);
 
 #if DBG
           al_draw_textf (font, al_map_rgb (255, 255, 255), 0, 0,

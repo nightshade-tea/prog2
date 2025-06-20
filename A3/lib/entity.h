@@ -1,6 +1,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H 1
 
+#include "camera.h"
 #include "object.h"
 #include "sprites.h"
 
@@ -30,6 +31,6 @@ void ent_update_position (ENTITY *ent);
 
 /* updates object points to keep it inside the screen limits.
  * if a collision occurs, the velocity vector is updated accordingly. */
-void ent_keep_inside_bounds (ENTITY *ent);
+void ent_keep_inside_bounds (ENTITY *ent, CAMERA *cam);
 
 #endif /* entity.h */

@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "camera.h"
 #include "def.h"
 #include "duck.h"
 #include "keyboard.h"
@@ -15,7 +16,8 @@ duck_create ()
 }
 
 void
-duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites)
+duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
+             CAMERA *cam)
 {
   float ax = 0;
   float vx = 0;
@@ -117,7 +119,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites)
 
   ent_update_velocity (duck);
   ent_update_position (duck);
-  ent_keep_inside_bounds (duck);
+  ent_keep_inside_bounds (duck, cam);
 
   // update flip flag
   if (duck->v.x > 0)

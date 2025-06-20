@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "camera.h"
 #include "def.h"
 #include "object.h"
 
@@ -50,4 +51,19 @@ obj_collides (OBJECT *a, OBJECT *b)
     return 0;
 
   return 1;
+}
+
+void
+obj_draw (OBJECT *obj, CAMERA *cam, SPRITES *sprites)
+{
+#if DBG
+  al_draw_rectangle (obj->p.x - cam->offx, obj->p.y, obj->q.x - cam->offx,
+                     obj->q.y, al_map_rgb (255, 0, 0), 1);
+#endif
+
+  if (obj->sid == SPRITE_NODRAW)
+    return;
+
+  al_draw_bitmap (sprites_get (sprites, obj->sid), obj->p.x - cam->offx,
+                  obj->p.y, obj->flip);
 }

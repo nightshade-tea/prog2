@@ -1,6 +1,7 @@
 #ifndef DUCK_H
 #define DUCK_H 1
 
+#include "camera.h"
 #include "entity.h"
 #include "keyboard.h"
 #include "sprites.h"
@@ -33,6 +34,6 @@
 ENTITY *duck_create ();
 
 void duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX],
-                  SPRITES *sprites);
+                  SPRITES *sprites, CAMERA *cam);
 
 #endif /* duck.h */

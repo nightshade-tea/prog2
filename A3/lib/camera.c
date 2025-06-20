@@ -4,6 +4,7 @@
 
 #include "camera.h"
 #include "common.h"
+#include "def.h"
 
 #define load(X)                                                               \
   ensure (cam->layer[X - 1] = al_load_bitmap (CAM_LAYER_##X##_PATH))
@@ -40,6 +41,12 @@ cam_destroy (CAMERA *cam)
 void
 cam_move (CAMERA *cam, float offset)
 {
+  if (offset < CAM_BEGIN)
+    offset = CAM_BEGIN;
+
+  else if (offset > CAM_END - RENDER_WIDTH)
+    offset = CAM_END - RENDER_WIDTH;
+
   cam->offx = offset;
 }
 
