@@ -76,10 +76,13 @@ ent_keep_inside_bounds (ENTITY *ent, CAMERA *cam)
     {
       ent->p.y = 0;
       ent->q.y = ent->p.y + ent->sz.y;
+      ent->v.y = 0;
     }
 
   else if (ent->q.y > RENDER_HEIGHT)
     {
+      // land ...
+
       ent->q.y = RENDER_HEIGHT;
       ent->p.y = ent->q.y - ent->sz.y;
       ent->v.y = 0;

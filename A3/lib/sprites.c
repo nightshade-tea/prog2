@@ -49,6 +49,7 @@ sprites_load ()
   init (DUCK_CROUCH);
   init (DUCK_CRAWL);
   init (DUCK_DEATH);
+  init (DUCK_WALL_HIT);
 
   return sps;
 }
