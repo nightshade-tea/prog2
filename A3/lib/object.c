@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "camera.h"
-#include "def.h"
+#include "game.h"
 #include "object.h"
 
 OBJECT *

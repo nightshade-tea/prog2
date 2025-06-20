@@ -1,5 +1,5 @@
-#ifndef DEF_H
-#define DEF_H 1
+#ifndef GAME_H
+#define GAME_H 1
 
 #define DBG 0
 
@@ -9,4 +9,6 @@
 #define FPS 60.0
 #define GRAV 2.0 / (FPS / 30)
 
-#endif /* def.h */
+void start_game ();
+
+#endif /* game.h */

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "camera.h"
-#include "def.h"
+#include "game.h"
 #include "duck.h"
 #include "keyboard.h"
 #include "object.h"

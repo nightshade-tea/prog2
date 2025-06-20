@@ -4,7 +4,7 @@
 
 #include "camera.h"
 #include "common.h"
-#include "def.h"
+#include "game.h"
 
 #define load(X)                                                               \
   ensure (cam->layer[X - 1] = al_load_bitmap (CAM_LAYER_##X##_PATH))

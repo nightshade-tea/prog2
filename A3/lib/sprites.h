@@ -3,7 +3,7 @@
 
 #include <allegro5/allegro5.h>
 
-#include "def.h"
+#include "game.h"
 
 #define SPRITES_UPDATE_RATE (int)(3 * (FPS / 30)) // roughly 10 FPS
 
