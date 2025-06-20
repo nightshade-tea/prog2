@@ -1,3 +1,5 @@
+#include <allegro5/allegro_primitives.h>
+
 #include <stdbool.h>
 #include <stdlib.h>
 
