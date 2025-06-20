@@ -151,7 +151,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
           duck->sz.x = DUCK_CRAWL_SZX;
           duck->sz.y = DUCK_CRAWL_SZY;
 
-          duck->q.x += (DUCK_CRAWL_SZX - DUCK_SZX) / 2;
+          duck->q.x += (DUCK_CRAWL_SZX - DUCK_SZX) / 2.0;
 
           duck->p.x = duck->q.x - duck->sz.x;
           duck->p.y = duck->q.y - duck->sz.y;
@@ -163,7 +163,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
       duck->sz.x = DUCK_SZX;
       duck->sz.y = DUCK_SZY;
 
-      duck->q.x += (DUCK_SZX - DUCK_CRAWL_SZX) / 2;
+      duck->q.x += (DUCK_SZX - DUCK_CRAWL_SZX) / 2.0;
 
       duck->p.x = duck->q.x - duck->sz.x;
       duck->p.y = duck->q.y - duck->sz.y;
