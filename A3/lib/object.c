@@ -59,8 +59,9 @@ void
 obj_draw (OBJECT *obj, CAMERA *cam, SPRITES *sprites)
 {
 #if DBG
-  al_draw_rectangle (obj->p.x - cam->offx, obj->p.y, obj->q.x - cam->offx,
-                     obj->q.y, al_map_rgb (255, 0, 0), 1);
+  al_draw_rectangle (obj->p.x - cam->offx + 0.5, obj->p.y + 0.5,
+                     obj->q.x - cam->offx - 0.5, obj->q.y - 0.5,
+                     al_map_rgb (255, 0, 0), 1);
 #endif
 
   if (obj->sid == SPRITE_NODRAW)
