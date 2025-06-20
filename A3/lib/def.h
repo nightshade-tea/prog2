@@ -3,8 +3,8 @@
 
 #define DBG 0
 
-#define RENDER_WIDTH 480
-#define RENDER_HEIGHT 300
+#define RENDER_WIDTH 576
+#define RENDER_HEIGHT 324
 
 #define FPS 60.0
 #define GRAV 2.0 / (FPS / 30)

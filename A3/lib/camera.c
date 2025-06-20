@@ -1,0 +1,71 @@
+#include <allegro5/allegro5.h>
+#include <math.h>
+#include <stdlib.h>
+
+#include "camera.h"
+#include "common.h"
+
+#define load(X)                                                               \
+  ensure (cam->layer[X - 1] = al_load_bitmap (CAM_LAYER_##X##_PATH))
+
+CAMERA *
+cam_create ()
+{
+  CAMERA *cam;
+
+  if (!(cam = malloc (sizeof *cam)))
+    return NULL;
+
+  cam->offx = 0;
+
+  load (1);
+  load (2);
+  load (3);
+  load (4);
+
+  return cam;
+}
+
+#undef load
+
+void
+cam_destroy (CAMERA *cam)
+{
+  for (int i = 0; i < CAM_LAYERS; i++)
+    al_destroy_bitmap (cam->layer[i]);
+
+  free (cam);
+}
+
+void
+cam_move (CAMERA *cam, float offset)
+{
+  cam->offx = offset;
+}
+
+static void
+draw_layer (ALLEGRO_BITMAP *layer, float offset)
+{
+  float x1, x2;
+
+  x1 = fmod (offset, CAM_LAYER_WIDTH);
+  x2 = CAM_LAYER_WIDTH - x1;
+
+  al_draw_bitmap_region (layer, x1, 0, x2, CAM_LAYER_HEIGHT, 0, 0, 0);
+  al_draw_bitmap_region (layer, 0, 0, CAM_LAYER_WIDTH - x2, CAM_LAYER_HEIGHT,
+                         CAM_LAYER_WIDTH - x1, 0, 0);
+}
+
+#define draw(X)                                                               \
+  draw_layer (cam->layer[X - 1], cam->offx *CAM_LAYER_##X##_RELSPD)
+
+void
+cam_draw (CAMERA *cam)
+{
+  draw (1);
+  draw (2);
+  draw (3);
+  draw (4);
+}
+
+#undef draw

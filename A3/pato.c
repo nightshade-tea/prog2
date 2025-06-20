@@ -3,6 +3,7 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
+#include "lib/camera.h"
 #include "lib/common.h"
 #include "lib/def.h"
 #include "lib/duck.h"
@@ -59,6 +60,7 @@ int
 main ()
 {
   ALLEGRO_EVENT event;
+  CAMERA *cam;
   ENTITY *duck;
   SPRITES *sprites;
   KEYBOARD key[ALLEGRO_KEY_MAX];
@@ -68,6 +70,7 @@ main ()
   init_allegro ();
 
   kbd_init (key);
+  ensure (cam = cam_create ());
   ensure (duck = duck_create ());
   ensure (sprites = sprites_load ());
 
@@ -87,9 +90,13 @@ main ()
           duck_update (duck, key, sprites);
 
           if (key[ALLEGRO_KEY_ESCAPE] || key[ALLEGRO_KEY_Q])
-            done = true;
+            {
+              done = true;
+              continue;
+            }
 
           kbd_reset_seen (key);
+          cam->offx += 1 / (FPS / 30);
 
           redraw = true;
           break;
@@ -109,7 +116,8 @@ main ()
 
       if (redraw && al_is_event_queue_empty (queue))
         {
-          al_clear_to_color (al_map_rgb (0, 0, 0));
+          //        al_clear_to_color (al_map_rgb (0, 0, 0));
+          cam_draw (cam);
 
 #if DBG
           al_draw_rectangle (duck->p.x, duck->p.y, duck->q.x, duck->q.y,
@@ -131,6 +139,7 @@ main ()
         }
     }
 
+  cam_destroy (cam);
   ent_destroy (duck);
   sprites_destroy (sprites);
   al_destroy_font (font);

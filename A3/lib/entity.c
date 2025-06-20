@@ -58,29 +58,29 @@ ent_update_position (ENTITY *ent)
 void
 ent_keep_inside_bounds (ENTITY *ent)
 {
-  if (ent->p.x < 0.5)
+  if (ent->p.x < 0)
     {
-      ent->p.x = 0.5;
+      ent->p.x = 0;
       ent->q.x = ent->p.x + ent->sz.x;
       ent->v.x = 0;
     }
 
-  else if (ent->q.x > RENDER_WIDTH - 0.5)
+  else if (ent->q.x > RENDER_WIDTH)
     {
-      ent->q.x = RENDER_WIDTH - 0.5;
+      ent->q.x = RENDER_WIDTH;
       ent->p.x = ent->q.x - ent->sz.x;
       ent->v.x = 0;
     }
 
-  if (ent->p.y < 0.5)
+  if (ent->p.y < 0)
     {
-      ent->p.y = 0.5;
+      ent->p.y = 0;
       ent->q.y = ent->p.y + ent->sz.y;
     }
 
-  else if (ent->q.y > RENDER_HEIGHT - 0.5)
+  else if (ent->q.y > RENDER_HEIGHT)
     {
-      ent->q.y = RENDER_HEIGHT - 0.5;
+      ent->q.y = RENDER_HEIGHT;
       ent->p.y = ent->q.y - ent->sz.y;
       ent->v.y = 0;
     }
