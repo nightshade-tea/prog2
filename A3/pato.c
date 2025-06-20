@@ -95,6 +95,7 @@ main ()
           sprites_update (sprites);
           duck_update (duck, key, sprites, cam);
           cam_move (cam, (duck->p.x + duck->q.x - RENDER_WIDTH) / 2);
+          cam_update_time (cam);
 
           kbd_reset_seen (key);
           cam->offx += 1 / (FPS / 30);

@@ -18,6 +18,7 @@ cam_create ()
     return NULL;
 
   cam->offx = 0;
+  cam->time = 0;
 
   load (1);
   load (2);
@@ -50,6 +51,12 @@ cam_move (CAMERA *cam, float offset)
   cam->offx = offset;
 }
 
+void
+cam_update_time (CAMERA *cam)
+{
+  cam->time += CAM_TIME_INC;
+}
+
 static void
 draw_layer (ALLEGRO_BITMAP *layer, float offset)
 {
@@ -64,7 +71,8 @@ draw_layer (ALLEGRO_BITMAP *layer, float offset)
 }
 
 #define draw(X)                                                               \
-  draw_layer (cam->layer[X - 1], cam->offx *CAM_LAYER_##X##_RELSPD)
+  draw_layer (cam->layer[X - 1], cam->offx *CAM_LAYER_##X##_RELSPD            \
+                                     + cam->time * CAM_LAYER_##X##_BASESPD)
 
 void
 cam_draw (CAMERA *cam)
