@@ -3,10 +3,12 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
-#include "game.h"
+#include <stdbool.h>
+
 #include "camera.h"
 #include "common.h"
 #include "duck.h"
+#include "game.h"
 #include "keyboard.h"
 #include "sprites.h"
 
@@ -14,6 +16,7 @@ extern ALLEGRO_TIMER *timer;
 extern ALLEGRO_EVENT_QUEUE *queue;
 extern ALLEGRO_DISPLAY *disp;
 extern ALLEGRO_FONT *font;
+extern SPRITES *sprites;
 
 void
 start_game ()
@@ -22,14 +25,12 @@ start_game ()
   ALLEGRO_EVENT event;
   CAMERA *cam;
   ENTITY *duck;
-  SPRITES *sprites;
   bool redraw = true;
   bool done = false;
 
   kbd_init (key);
   ensure (cam = cam_create ());
   ensure (duck = duck_create ());
-  ensure (sprites = sprites_load ());
 
   al_start_timer (timer);
 
@@ -40,7 +41,7 @@ start_game ()
       switch (event.type)
         {
         case ALLEGRO_EVENT_TIMER:
-          if (key[ALLEGRO_KEY_ESCAPE] || key[ALLEGRO_KEY_Q])
+          if (key[ALLEGRO_KEY_ESCAPE])
             {
               done = true;
               continue;
@@ -89,5 +90,4 @@ start_game ()
 
   cam_destroy (cam);
   ent_destroy (duck);
-  sprites_destroy (sprites);
 }

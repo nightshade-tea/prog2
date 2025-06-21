@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 #include "camera.h"
-#include "game.h"
 #include "duck.h"
+#include "game.h"
 #include "keyboard.h"
 #include "object.h"
 #include "sprites.h"

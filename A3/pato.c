@@ -5,11 +5,14 @@
 
 #include "lib/common.h"
 #include "lib/game.h"
+#include "lib/menu.h"
+#include "lib/sprites.h"
 
 ALLEGRO_TIMER *timer;
 ALLEGRO_EVENT_QUEUE *queue;
 ALLEGRO_DISPLAY *disp;
 ALLEGRO_FONT *font;
+SPRITES *sprites;
 
 static void
 init_allegro ()
@@ -56,11 +59,16 @@ int
 main ()
 {
   init_allegro ();
+
+  ensure (sprites = sprites_load ());
+
   init_display ();
   init_queue ();
 
-  start_game ();
+  if (start_menu ())
+    start_game ();
 
+  sprites_destroy (sprites);
   al_destroy_font (font);
   al_destroy_display (disp);
   al_destroy_timer (timer);
