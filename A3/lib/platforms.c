@@ -3,9 +3,9 @@
 #include "object.h"
 #include "sprites.h"
 
-OBJECT platforms[] = { { .p = { 50.0, 200.0 },
-                         .q = { 150.0, 250.0 },
-                         .sz = { 100.0, 50.0 },
+OBJECT platforms[] = { { .p = { 250.0, 274.0 },
+                         .q = { 350.0, 314.0 },
+                         .sz = { 100.0, 40.0 },
                          .sid = SPRITE_NODRAW,
                          .flip = 0 } };
 

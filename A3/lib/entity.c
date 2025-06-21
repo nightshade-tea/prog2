@@ -98,18 +98,18 @@ ent_move (ENTITY *ent, float x, float y)
 }
 
 unsigned char
-ent_collides (ENTITY *ent, OBJECT *obj)
+ent_collides (ENTITY *ent, OBJECT *obj, float delta)
 {
-  if (ent->p.x > obj->q.x)
+  if (ent->p.x + delta > obj->q.x)
     return 0;
 
-  if (ent->q.x < obj->p.x)
+  if (ent->q.x - delta < obj->p.x)
     return 0;
 
-  if (ent->p.y > obj->q.y)
+  if (ent->p.y + delta > obj->q.y)
     return 0;
 
-  if (ent->q.y < obj->p.y)
+  if (ent->q.y - delta < obj->p.y)
     return 0;
 
   return 1;
@@ -134,7 +134,7 @@ ent_collide (ENTITY *ent, OBJECT *obj)
   PAIR d;          // entc - objc
   PAIR overlap;
 
-  if (!ent_collides (ent, obj))
+  if (!ent_collides (ent, obj, ENT_COLLISION_DELTA))
     return;
 
   entc.x = ent->p.x + (ent->sz.x / 2.0);

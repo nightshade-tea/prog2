@@ -88,7 +88,7 @@ wall_hit (ENTITY *duck, OBJECT *obj)
   if (duck->v.x == 0)
     return;
 
-  if (!ent_collides (duck, obj))
+  if (!ent_collides (duck, obj, 0))
     return;
 
   duckc.x = duck->p.x + (duck->sz.x / 2.0);
@@ -103,7 +103,7 @@ wall_hit (ENTITY *duck, OBJECT *obj)
   overlap.x = ((duck->sz.x + obj->sz.x) / 2.0) - fabs (d.x);
   overlap.y = ((duck->sz.y + obj->sz.y) / 2.0) - fabs (d.y);
 
-  if (overlap.x < overlap.y)
+  if (overlap.x < overlap.y && ((duck->v.x < 0) != (d.x < 0)))
     {
       duck->sid = SPRITE_DUCK_WALL_HIT;
       update_geometry (duck);
@@ -122,6 +122,20 @@ wall_hit (ENTITY *duck, OBJECT *obj)
     }
 }
 
+static unsigned char
+in_tunnel (ENTITY *duck, OBJECT *obj)
+{
+  float dy = SPRITE_DUCK_IDLE_H - duck->sz.y;
+
+  if (duck->p.y - dy >= obj->q.y || duck->q.y <= obj->p.y)
+    return 0;
+
+  if (duck->q.x <= obj->p.x || duck->p.x >= obj->q.x)
+    return 0;
+
+  return 1;
+}
+
 void
 duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
              CAMERA *cam)
@@ -131,6 +145,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
   float threshold;
   float inertia;
   bool on_ground;
+  bool tunnel;
 
   // inertia
   if (duck->v.y == 0)
@@ -159,6 +174,15 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
   else
     duck->a.y = GRAV;
 
+  tunnel = false;
+
+  for (size_t i = 0; i < platforms_num; i++)
+    if (in_tunnel (duck, &platforms[i]))
+      {
+        tunnel = true;
+        break;
+      }
+
   // handle keypresses
   if (key[ALLEGRO_KEY_SPACE] & KEY_SEEN)
     {
@@ -168,7 +192,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
 
   if (key[ALLEGRO_KEY_A] || key[ALLEGRO_KEY_D])
     {
-      if (key[ALLEGRO_KEY_S] && duck->v.y == 0)
+      if ((tunnel || key[ALLEGRO_KEY_S]) && duck->v.y == 0)
         {
           ax = DUCK_CRAWLACC;
           vx = DUCK_CRAWLSPD;
@@ -236,7 +260,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
   // update sprite id
   if (!key[ALLEGRO_KEY_A] && !key[ALLEGRO_KEY_D])
     {
-      if (key[ALLEGRO_KEY_S])
+      if (tunnel || key[ALLEGRO_KEY_S])
         duck->sid = SPRITE_DUCK_CROUCH;
       else
         duck->sid = SPRITE_DUCK_IDLE;

@@ -5,6 +5,8 @@
 #include "object.h"
 #include "sprites.h"
 
+#define ENT_COLLISION_DELTA 1.0e-3
+
 /* an entity is an object with movement vectors. */
 typedef struct ENTITY
 {
@@ -33,7 +35,7 @@ void ent_update_position (ENTITY *ent);
  * if a collision occurs, the velocity vector is updated accordingly. */
 void ent_keep_inside_bounds (ENTITY *ent, CAMERA *cam);
 
-unsigned char ent_collides (ENTITY *ent, OBJECT *obj);
+unsigned char ent_collides (ENTITY *ent, OBJECT *obj, float delta);
 
 unsigned char ent_on_top_of (ENTITY *ent, OBJECT *obj);
 
