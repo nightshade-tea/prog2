@@ -12,11 +12,53 @@
 #include "keyboard.h"
 #include "sprites.h"
 
+#define PAUSE_DIM_COLOR 29, 29, 29, 157
+
+#define PAUSE_TEXT_FOREGROUND_COLOR 221, 221, 221
+#define PAUSE_TEXT_SHADOW_COLOR 74, 74, 74
+
 extern ALLEGRO_TIMER *timer;
 extern ALLEGRO_EVENT_QUEUE *queue;
 extern ALLEGRO_DISPLAY *disp;
 extern ALLEGRO_FONT *font;
 extern SPRITES *sprites;
+
+static bool paused = false;
+
+static void
+pause_write (char const *text, float x, float y, int flags)
+{
+  al_draw_text (font, al_map_rgb (PAUSE_TEXT_SHADOW_COLOR), x - 1.0, y + 1.0,
+                flags, text);
+  al_draw_text (font, al_map_rgb (PAUSE_TEXT_FOREGROUND_COLOR), x, y, flags,
+                text);
+}
+
+static void
+pause_game ()
+{
+  al_stop_timer (timer);
+  paused = true;
+
+  al_draw_filled_rectangle (0, 0, RENDER_WIDTH, RENDER_HEIGHT,
+                            al_map_rgba (PAUSE_DIM_COLOR));
+
+  pause_write ("aperte ESC para continuar ou Q para sair", RENDER_WIDTH / 2.0,
+               RENDER_HEIGHT / 4.0, ALLEGRO_ALIGN_CENTRE);
+
+  al_flip_display ();
+}
+
+static void
+resume_game ()
+{
+  paused = false;
+
+  al_flush_event_queue (queue);
+
+  al_set_timer_count (timer, 0);
+  al_resume_timer (timer);
+}
 
 void
 start_game ()
@@ -41,11 +83,8 @@ start_game ()
       switch (event.type)
         {
         case ALLEGRO_EVENT_TIMER:
-          if (key[ALLEGRO_KEY_ESCAPE])
-            {
-              done = true;
-              continue;
-            }
+          if (paused)
+            break;
 
           sprites_update (sprites);
           duck_update (duck, key, sprites, cam);
@@ -60,6 +99,31 @@ start_game ()
 
         case ALLEGRO_EVENT_KEY_DOWN:
           kbd_press (key, event.keyboard.keycode);
+
+          if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+            {
+              if (!paused)
+                {
+                  redraw = false;
+                  pause_game ();
+                }
+
+              else
+                {
+                  redraw = true;
+                  resume_game ();
+                }
+            }
+
+          if (event.keyboard.keycode == ALLEGRO_KEY_Q && paused)
+            {
+              done = true;
+              continue;
+            }
+
+          if (paused)
+            kbd_reset_seen (key);
+
           break;
 
         case ALLEGRO_EVENT_KEY_UP:

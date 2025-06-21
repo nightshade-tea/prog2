@@ -62,13 +62,6 @@ start_menu ()
       switch (event.type)
         {
         case ALLEGRO_EVENT_TIMER:
-          if (key[ALLEGRO_KEY_ESCAPE])
-            {
-              done = true;
-              start = 0;
-              continue;
-            }
-
           sprites_update (sprites);
 
           frame_counter++;
