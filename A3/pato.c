@@ -35,6 +35,7 @@ init_display ()
   float scalex, scaley;
 
   al_set_new_display_flags (ALLEGRO_FULLSCREEN_WINDOW);
+  al_set_new_display_option (ALLEGRO_VSYNC, 1, ALLEGRO_REQUIRE);
   ensure (disp = al_create_display (RENDER_WIDTH, RENDER_HEIGHT));
 
   scalex = ((float)al_get_display_width (disp)) / RENDER_WIDTH;
@@ -45,6 +46,9 @@ init_display ()
   al_use_transform (&transf);
 
   al_hide_mouse_cursor (disp);
+
+  al_clear_to_color (al_map_rgb (BACKGROUND_COLOR));
+  al_flip_display ();
 }
 
 static void
