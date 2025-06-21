@@ -47,7 +47,7 @@ init_display ()
 
   al_hide_mouse_cursor (disp);
 
-  al_clear_to_color (al_map_rgb (BACKGROUND_COLOR));
+  al_clear_to_color (al_map_rgb (MENU_BACKGROUND_COLOR));
   al_flip_display ();
 }
 

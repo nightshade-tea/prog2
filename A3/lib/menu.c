@@ -20,25 +20,25 @@ static void
 draw_duck ()
 {
   al_draw_scaled_bitmap (sprites_get (sprites, SPRITE_DUCK_IDLE), 0, 0,
-                         SPRITE_DUCK_IDLE_W, SPRITE_DUCK_IDLE_H, DUCK_X,
-                         DUCK_Y, SPRITE_DUCK_IDLE_W * DUCK_SCALE,
-                         SPRITE_DUCK_IDLE_H * DUCK_SCALE, 0);
+                         SPRITE_DUCK_IDLE_W, SPRITE_DUCK_IDLE_H, MENU_DUCK_X,
+                         MENU_DUCK_Y, SPRITE_DUCK_IDLE_W * MENU_DUCK_SCALE,
+                         SPRITE_DUCK_IDLE_H * MENU_DUCK_SCALE, 0);
 }
 
 static void
 draw_selected (char const *text, float x, float y, int flags)
 {
-  al_draw_text (font, al_map_rgb (SELECT_COLOR), x - 1.0, y + 1.0, flags,
+  al_draw_text (font, al_map_rgb (MENU_SELECT_COLOR), x - 1.0, y + 1.0, flags,
                 text);
-  al_draw_text (font, al_map_rgb (FOREGROUND_COLOR), x, y, flags, text);
+  al_draw_text (font, al_map_rgb (MENU_FOREGROUND_COLOR), x, y, flags, text);
 }
 
 static void
 draw_regular (char const *text, float x, float y, int flags)
 {
-  al_draw_text (font, al_map_rgb (SHADOW_COLOR), x - 1.0, y + 1.0, flags,
+  al_draw_text (font, al_map_rgb (MENU_SHADOW_COLOR), x - 1.0, y + 1.0, flags,
                 text);
-  al_draw_text (font, al_map_rgb (FOREGROUND_COLOR), x, y, flags, text);
+  al_draw_text (font, al_map_rgb (MENU_FOREGROUND_COLOR), x, y, flags, text);
 }
 
 unsigned char
@@ -66,7 +66,7 @@ start_menu ()
 
           frame_counter++;
 
-          if (!(frame_counter % DOT_UPDATE_RATE))
+          if (!(frame_counter % MENU_DOT_UPDATE_RATE))
             {
               dot = !dot;
               frame_counter = 0;
@@ -113,9 +113,10 @@ start_menu ()
 
       if (redraw && al_is_event_queue_empty (queue))
         {
-          al_clear_to_color (al_map_rgb (BACKGROUND_COLOR));
+          al_clear_to_color (al_map_rgb (MENU_BACKGROUND_COLOR));
 
-          draw_regular (TITLE, TITLE_X, TITLE_Y, ALLEGRO_ALIGN_CENTRE);
+          draw_regular (MENU_TITLE, MENU_TITLE_X, MENU_TITLE_Y,
+                        ALLEGRO_ALIGN_CENTRE);
 
           draw_duck ();
 
@@ -123,16 +124,18 @@ start_menu ()
             {
               if (dot)
                 {
-                  draw_selected (START_DOT, START_X, START_Y,
+                  draw_selected (MENU_START_DOT, MENU_START_X, MENU_START_Y,
                                  ALLEGRO_ALIGN_CENTRE);
-                  draw_regular (EXIT, EXIT_X, EXIT_Y, ALLEGRO_ALIGN_CENTRE);
+                  draw_regular (MENU_EXIT, MENU_EXIT_X, MENU_EXIT_Y,
+                                ALLEGRO_ALIGN_CENTRE);
                 }
 
               else
                 {
-                  draw_selected (START, START_X, START_Y,
+                  draw_selected (MENU_START, MENU_START_X, MENU_START_Y,
                                  ALLEGRO_ALIGN_CENTRE);
-                  draw_regular (EXIT, EXIT_X, EXIT_Y, ALLEGRO_ALIGN_CENTRE);
+                  draw_regular (MENU_EXIT, MENU_EXIT_X, MENU_EXIT_Y,
+                                ALLEGRO_ALIGN_CENTRE);
                 }
             }
 
@@ -140,15 +143,18 @@ start_menu ()
             {
               if (dot)
                 {
-                  draw_regular (START, START_X, START_Y, ALLEGRO_ALIGN_CENTRE);
-                  draw_selected (EXIT_DOT, EXIT_X, EXIT_Y,
+                  draw_regular (MENU_START, MENU_START_X, MENU_START_Y,
+                                ALLEGRO_ALIGN_CENTRE);
+                  draw_selected (MENU_EXIT_DOT, MENU_EXIT_X, MENU_EXIT_Y,
                                  ALLEGRO_ALIGN_CENTRE);
                 }
 
               else
                 {
-                  draw_regular (START, START_X, START_Y, ALLEGRO_ALIGN_CENTRE);
-                  draw_selected (EXIT, EXIT_X, EXIT_Y, ALLEGRO_ALIGN_CENTRE);
+                  draw_regular (MENU_START, MENU_START_X, MENU_START_Y,
+                                ALLEGRO_ALIGN_CENTRE);
+                  draw_selected (MENU_EXIT, MENU_EXIT_X, MENU_EXIT_Y,
+                                 ALLEGRO_ALIGN_CENTRE);
                 }
             }
 
