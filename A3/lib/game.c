@@ -12,11 +12,6 @@
 #include "keyboard.h"
 #include "sprites.h"
 
-#define PAUSE_DIM_COLOR 29, 29, 29, 157
-
-#define PAUSE_TEXT_FOREGROUND_COLOR 221, 221, 221
-#define PAUSE_TEXT_SHADOW_COLOR 74, 74, 74
-
 extern ALLEGRO_TIMER *timer;
 extern ALLEGRO_EVENT_QUEUE *queue;
 extern ALLEGRO_DISPLAY *disp;
@@ -26,38 +21,33 @@ extern SPRITES *sprites;
 static bool paused = false;
 
 static void
-pause_write (char const *text, float x, float y, int flags)
-{
-  al_draw_text (font, al_map_rgb (PAUSE_TEXT_SHADOW_COLOR), x - 1.0, y + 1.0,
-                flags, text);
-  al_draw_text (font, al_map_rgb (PAUSE_TEXT_FOREGROUND_COLOR), x, y, flags,
-                text);
-}
-
-static void
 pause_game ()
 {
-  al_stop_timer (timer);
   paused = true;
-
-  al_draw_filled_rectangle (0, 0, RENDER_WIDTH, RENDER_HEIGHT,
-                            al_map_rgba (PAUSE_DIM_COLOR));
-
-  pause_write ("aperte ESC para continuar ou Q para sair", RENDER_WIDTH / 2.0,
-               RENDER_HEIGHT / 4.0, ALLEGRO_ALIGN_CENTRE);
-
-  al_flip_display ();
 }
 
 static void
 resume_game ()
 {
   paused = false;
+}
 
-  al_flush_event_queue (queue);
+static void
+pause_write (char const *text, float x, float y, int flags)
+{
+  al_draw_text (font, al_map_rgb (PAUSE_MSG_SHADOW_COLOR), x - 1.0, y + 1.0,
+                flags, text);
+  al_draw_text (font, al_map_rgb (PAUSE_MSG_FOREGROUND_COLOR), x, y, flags,
+                text);
+}
 
-  al_set_timer_count (timer, 0);
-  al_resume_timer (timer);
+static void
+pause_menu ()
+{
+  al_draw_filled_rectangle (0, 0, RENDER_WIDTH, RENDER_HEIGHT,
+                            al_map_rgba (PAUSE_DIM_COLOR));
+
+  pause_write (PAUSE_MSG, PAUSE_MSG_X, PAUSE_MSG_Y, ALLEGRO_ALIGN_CENTRE);
 }
 
 void
@@ -103,16 +93,12 @@ start_game ()
           if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
             {
               if (!paused)
-                {
-                  redraw = false;
-                  pause_game ();
-                }
+                pause_game ();
 
               else
-                {
-                  redraw = true;
-                  resume_game ();
-                }
+                resume_game ();
+
+              redraw = true;
             }
 
           if (event.keyboard.keycode == ALLEGRO_KEY_Q && paused)
@@ -146,6 +132,9 @@ start_game ()
                          "p.x=%05.1f p.y=%05.1f q.x=%05.1f q.y=%05.1f",
                          duck->p.x, duck->p.y, duck->q.x, duck->q.y);
 #endif
+
+          if (paused)
+            pause_menu ();
 
           al_flip_display ();
           redraw = false;
