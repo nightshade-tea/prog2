@@ -37,24 +37,6 @@ obj_destroy (OBJECT *obj)
   free (obj);
 }
 
-unsigned char
-obj_collides (OBJECT *a, OBJECT *b)
-{
-  if (a->p.x > b->q.x)
-    return 0;
-
-  if (a->q.x < b->p.x)
-    return 0;
-
-  if (a->p.y > b->q.y)
-    return 0;
-
-  if (a->q.y < b->p.y)
-    return 0;
-
-  return 1;
-}
-
 void
 obj_draw (OBJECT *obj, CAMERA *cam, SPRITES *sprites)
 {

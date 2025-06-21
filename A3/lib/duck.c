@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "camera.h"
@@ -6,7 +7,11 @@
 #include "game.h"
 #include "keyboard.h"
 #include "object.h"
+#include "platforms.h"
 #include "sprites.h"
+
+extern OBJECT platforms[];
+extern const size_t platforms_num;
 
 ENTITY *
 duck_create ()
@@ -73,6 +78,50 @@ update_geometry (ENTITY *duck)
 
 #undef handle_case
 
+static void
+wall_hit (ENTITY *duck, OBJECT *obj)
+{
+  PAIR duckc, objc;
+  PAIR d;
+  PAIR overlap;
+
+  if (duck->v.x == 0)
+    return;
+
+  if (!ent_collides (duck, obj))
+    return;
+
+  duckc.x = duck->p.x + (duck->sz.x / 2.0);
+  duckc.y = duck->p.y + (duck->sz.y / 2.0);
+
+  objc.x = obj->p.x + (obj->sz.x / 2.0);
+  objc.y = obj->p.y + (obj->sz.y / 2.0);
+
+  d.x = duckc.x - objc.x;
+  d.y = duckc.y - objc.y;
+
+  overlap.x = ((duck->sz.x + obj->sz.x) / 2.0) - fabs (d.x);
+  overlap.y = ((duck->sz.y + obj->sz.y) / 2.0) - fabs (d.y);
+
+  if (overlap.x < overlap.y)
+    {
+      duck->sid = SPRITE_DUCK_WALL_HIT;
+      update_geometry (duck);
+
+      if (d.x > 0)
+        {
+          duck->p.x = obj->q.x;
+          duck->q.x = duck->p.x + duck->sz.x;
+        }
+
+      else
+        {
+          duck->q.x = obj->p.x;
+          duck->p.x = duck->q.x - duck->sz.x;
+        }
+    }
+}
+
 void
 duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
              CAMERA *cam)
@@ -81,6 +130,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
   float vx;
   float threshold;
   float inertia;
+  bool on_ground;
 
   // inertia
   if (duck->v.y == 0)
@@ -201,6 +251,18 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
   else if (duck->v.x < 0)
     duck->flip = 1;
 
+  on_ground = false;
+
+  if (duck->q.y >= RENDER_HEIGHT)
+    on_ground = true;
+
+  for (size_t i = 0; i < platforms_num; i++)
+    if (ent_on_top_of (duck, &platforms[i]))
+      {
+        on_ground = true;
+        break;
+      }
+
   if (duck->p.x + duck->v.x - cam->offx < 0)
     {
       duck->sid = SPRITE_DUCK_WALL_HIT;
@@ -217,13 +279,20 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
       duck->q.x = duck->p.x + duck->sz.x;
     }
 
+  for (size_t i = 0; i < platforms_num; i++)
+    wall_hit (duck, &platforms[i]);
+
   if (duck->v.y < 0)
     duck->sid = SPRITE_DUCK_JUMP;
 
-  else if (duck->q.y + duck->v.y < RENDER_HEIGHT)
+  else if (!on_ground)
     duck->sid = SPRITE_DUCK_FALL;
 
   update_geometry (duck);
   ent_update_position (duck);
+
+  for (size_t i = 0; i < platforms_num; i++)
+    ent_collide (duck, &platforms[i]);
+
   ent_keep_inside_bounds (duck, cam);
 }

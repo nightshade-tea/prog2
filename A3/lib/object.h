@@ -29,8 +29,6 @@ OBJECT *obj_create (float px, float py, float szx, float szy, SPRITE_ID sid,
 
 void obj_destroy (OBJECT *obj);
 
-unsigned char obj_collides (OBJECT *a, OBJECT *b);
-
 void obj_draw (OBJECT *obj, CAMERA *cam, SPRITES *sprites);
 
 #endif /* object.h */

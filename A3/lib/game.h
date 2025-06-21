@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H 1
 
-#define DBG 0
+#define DBG 1
 
 #define RENDER_WIDTH 576
 #define RENDER_HEIGHT 324

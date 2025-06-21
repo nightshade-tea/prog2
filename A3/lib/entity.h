@@ -33,4 +33,10 @@ void ent_update_position (ENTITY *ent);
  * if a collision occurs, the velocity vector is updated accordingly. */
 void ent_keep_inside_bounds (ENTITY *ent, CAMERA *cam);
 
+unsigned char ent_collides (ENTITY *ent, OBJECT *obj);
+
+unsigned char ent_on_top_of (ENTITY *ent, OBJECT *obj);
+
+void ent_collide (ENTITY *ent, OBJECT *obj);
+
 #endif /* entity.h */

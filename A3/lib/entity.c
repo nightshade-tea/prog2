@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdlib.h>
 
 #include "entity.h"
@@ -81,10 +82,94 @@ ent_keep_inside_bounds (ENTITY *ent, CAMERA *cam)
 
   else if (ent->q.y > RENDER_HEIGHT)
     {
-      // land ...
-
       ent->q.y = RENDER_HEIGHT;
       ent->p.y = ent->q.y - ent->sz.y;
       ent->v.y = 0;
+    }
+}
+
+static void
+ent_move (ENTITY *ent, float x, float y)
+{
+  ent->p.x += x;
+  ent->q.x += x;
+  ent->p.y += y;
+  ent->q.y += y;
+}
+
+unsigned char
+ent_collides (ENTITY *ent, OBJECT *obj)
+{
+  if (ent->p.x > obj->q.x)
+    return 0;
+
+  if (ent->q.x < obj->p.x)
+    return 0;
+
+  if (ent->p.y > obj->q.y)
+    return 0;
+
+  if (ent->q.y < obj->p.y)
+    return 0;
+
+  return 1;
+}
+
+unsigned char
+ent_on_top_of (ENTITY *ent, OBJECT *obj)
+{
+  if (ent->q.y < obj->p.y)
+    return 0;
+
+  if (ent->q.x < obj->p.x || ent->p.x > obj->q.x)
+    return 0;
+
+  return 1;
+}
+
+void
+ent_collide (ENTITY *ent, OBJECT *obj)
+{
+  PAIR entc, objc; // ent,obj centers
+  PAIR d;          // entc - objc
+  PAIR overlap;
+
+  if (!ent_collides (ent, obj))
+    return;
+
+  entc.x = ent->p.x + (ent->sz.x / 2.0);
+  entc.y = ent->p.y + (ent->sz.y / 2.0);
+
+  objc.x = obj->p.x + (obj->sz.x / 2.0);
+  objc.y = obj->p.y + (obj->sz.y / 2.0);
+
+  d.x = entc.x - objc.x;
+  d.y = entc.y - objc.y;
+
+  overlap.x = ((ent->sz.x + obj->sz.x) / 2.0) - fabs (d.x);
+  overlap.y = ((ent->sz.y + obj->sz.y) / 2.0) - fabs (d.y);
+
+  // resolve along the smallest overlap axis
+  if (overlap.x < overlap.y)
+    {
+      if (d.x > 0)
+        ent_move (ent, overlap.x, 0);
+
+      else
+        ent_move (ent, -overlap.x, 0);
+
+      ent->v.x = 0;
+    }
+
+  else
+    {
+      if (d.y > 0)
+        ent_move (ent, 0, overlap.y);
+
+      else
+        {
+          ent_move (ent, 0, -overlap.y);
+          ent->v.y = 0;
+        }
     }
 }

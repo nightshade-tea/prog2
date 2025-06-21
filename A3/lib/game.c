@@ -10,6 +10,7 @@
 #include "duck.h"
 #include "game.h"
 #include "keyboard.h"
+#include "platforms.h"
 #include "sprites.h"
 
 extern ALLEGRO_TIMER *timer;
@@ -124,6 +125,7 @@ start_game ()
       if (redraw && al_is_event_queue_empty (queue))
         {
           cam_draw (cam);
+          platforms_draw (cam, sprites);
           obj_draw ((OBJECT *)duck, cam, sprites);
 
 #if DBG
