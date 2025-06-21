@@ -11,8 +11,8 @@
 ENTITY *
 duck_create ()
 {
-  return ent_create (DUCK_PX, DUCK_PY, DUCK_SZX, DUCK_SZY, 0, 0, 0, GRAV,
-                     SPRITE_DUCK_IDLE, 0);
+  return ent_create (DUCK_DEFAULT_PX, DUCK_DEFAULT_PY, DUCK_DEFAULT_SZX,
+                     DUCK_DEFAULT_SZY, 0, 0, 0, GRAV, DUCK_DEFAULT_SPRITE, 0);
 }
 
 #define handle_case(X)                                                        \
@@ -80,16 +80,23 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
   float ax;
   float vx;
   float threshold;
+  float inertia;
 
   // inertia
-  if (fabs (duck->v.x) <= DUCK_INERTIA)
+  if (duck->v.y == 0)
+    inertia = DUCK_INERTIA;
+
+  else
+    inertia = DUCK_AIR_RESISTANCE;
+
+  if (fabs (duck->v.x) <= inertia)
     duck->a.x = duck->v.x = 0;
 
   else if (duck->v.x > 0)
-    duck->a.x = -1 * DUCK_INERTIA;
+    duck->a.x = -1 * inertia;
 
   else
-    duck->a.x = DUCK_INERTIA;
+    duck->a.x = inertia;
 
   // gliding
   if (duck->sid == SPRITE_DUCK_FALL && (duck->v.y >= DUCK_GLIDESPD)
@@ -138,7 +145,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
       if (duck->v.x < vx)
         threshold = ax;
       else
-        threshold = DUCK_INERTIA;
+        threshold = inertia;
 
       if (fabs (duck->v.x - vx) <= threshold)
         {
@@ -147,7 +154,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
         }
 
       else if (duck->v.x > vx)
-        duck->a.x = -1 * DUCK_INERTIA;
+        duck->a.x = -1 * inertia;
 
       else
         duck->a.x = ax;
@@ -159,7 +166,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
       vx *= -1;
 
       if (duck->v.x < vx)
-        threshold = DUCK_INERTIA;
+        threshold = inertia;
       else
         threshold = -ax;
 
@@ -170,7 +177,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
         }
 
       else if (duck->v.x < vx)
-        duck->a.x = DUCK_INERTIA;
+        duck->a.x = inertia;
 
       else
         duck->a.x = ax;
