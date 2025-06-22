@@ -8,8 +8,8 @@
 
 #define BULLETS_MAX 1024
 
-#define BULLET_SPEED DUCK_WALKSPD + (ENT_COLLISION_DELTA * 2.0)
-#define BULLET_ACCEL 0.2
+#define BULLET_SPEED DUCK_WALKSPD
+#define BULLET_ACCEL DUCK_INERTIA * 2.0
 #define BULLET_DAMAGE 1
 
 void bullets_init ();

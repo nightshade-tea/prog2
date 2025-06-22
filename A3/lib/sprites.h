@@ -61,10 +61,16 @@
 #define SPRITE_DUCK_WALL_HIT_STATES 1
 #define SPRITE_DUCK_WALL_HIT_CYCLIC 0
 
-#define SPRITE_DUCK_QUACK_PATH "assets/duck/quack.png"
+// #define SPRITE_DUCK_QUACK_PATH "assets/duck/quack.png"
+// #define SPRITE_DUCK_QUACK_W 9
+// #define SPRITE_DUCK_QUACK_H 29
+// #define SPRITE_DUCK_QUACK_STATES 4
+// #define SPRITE_DUCK_QUACK_CYCLIC 1
+
+#define SPRITE_DUCK_QUACK_PATH "assets/duck/quack_small.png"
 #define SPRITE_DUCK_QUACK_W 9
-#define SPRITE_DUCK_QUACK_H 29
-#define SPRITE_DUCK_QUACK_STATES 4
+#define SPRITE_DUCK_QUACK_H 16
+#define SPRITE_DUCK_QUACK_STATES 2
 #define SPRITE_DUCK_QUACK_CYCLIC 1
 
 #define SPRITE_MAGE_IDLE_PATH "assets/mage/idle.png"

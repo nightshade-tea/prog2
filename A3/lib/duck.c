@@ -345,12 +345,12 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
     {
       if (!quack_timer)
         {
-          quack_py = duck->q.y - SPRITE_DUCK_QUACK_H;
+          quack_py = (duck->p.y + duck->q.y - SPRITE_DUCK_QUACK_H) / 2.0;
 
           if (!duck->flip)
-            quack_px = duck->q.x;
+            quack_px = duck->q.x + duck->v.x;
           else
-            quack_px = duck->p.x - 8.0;
+            quack_px = duck->p.x + duck->v.x - 8.0;
 
           bullet_create (quack_px, quack_py, SPRITE_DUCK_QUACK, duck->flip,
                          0.0);
