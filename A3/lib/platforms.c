@@ -13,10 +13,7 @@
     .flip = 0 }
 
 OBJECT platforms[] = {
-  /* ground */
-  PLATFORM (-8.0, 304.0, 2324.0, 32.0, TILE_GRASS),
-
-  PLATFORM (300.0, 279.0, 64.0, 16.0, TILE_GRASS),
+  // PLATFORM (300.0, 299.0, 64.0, 16.0, TILE_DIRT),
 };
 
 #undef PLATFORM

@@ -81,13 +81,19 @@ update_geometry (ENTITY *duck)
 #undef handle_case
 
 static void
-wall_hit (ENTITY *duck, OBJECT *obj)
+wall_hit (ENTITY *duck, OBJECT *obj, KEYBOARD key[ALLEGRO_KEY_MAX])
 {
   PAIR duckc, objc;
   PAIR d;
   PAIR overlap;
 
   if (duck->v.x == 0)
+    return;
+
+  if (duck->v.x < 0 && !key[ALLEGRO_KEY_A])
+    return;
+
+  if (duck->v.x > 0 && !key[ALLEGRO_KEY_D])
     return;
 
   if (!ent_collides (duck, obj, 0))
@@ -289,7 +295,8 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
         break;
       }
 
-  if (duck->p.x + duck->v.x - cam->offx < 0)
+  if (duck->p.x + duck->v.x - cam->offx < 0
+      && !(duck->v.x < 0 && !key[ALLEGRO_KEY_A]))
     {
       duck->sid = SPRITE_DUCK_WALL_HIT;
       update_geometry (duck);
@@ -297,7 +304,8 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
       duck->q.x = duck->p.x + duck->sz.x;
     }
 
-  else if (duck->q.x + duck->v.x - cam->offx > RENDER_WIDTH)
+  else if (duck->q.x + duck->v.x - cam->offx > RENDER_WIDTH
+           && !(duck->v.x > 0 && !key[ALLEGRO_KEY_D]))
     {
       duck->sid = SPRITE_DUCK_WALL_HIT;
       update_geometry (duck);
@@ -306,7 +314,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
     }
 
   for (size_t i = 0; i < platforms_num; i++)
-    wall_hit (duck, &platforms[i]);
+    wall_hit (duck, &platforms[i], key);
 
   if (duck->v.y < 0)
     duck->sid = SPRITE_DUCK_JUMP;
