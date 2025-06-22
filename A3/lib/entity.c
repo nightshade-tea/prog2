@@ -7,7 +7,7 @@
 ENTITY *
 ent_create (float px, float py, float szx, float szy, float vx, float vy,
             float ax, float ay, SPRITE_ID sid, TILE_TYPE ttype,
-            unsigned char flip)
+            unsigned char flip, unsigned char health)
 {
   ENTITY *ent;
 
@@ -32,6 +32,8 @@ ent_create (float px, float py, float szx, float szy, float vx, float vy,
   ent->sid = sid;
   ent->ttype = ttype;
   ent->flip = flip;
+
+  ent->health = health;
 
   return ent;
 }

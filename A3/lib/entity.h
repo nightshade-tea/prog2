@@ -8,7 +8,7 @@
 
 #define ENT_COLLISION_DELTA 1.0e-3
 
-/* an entity is an object with movement vectors. */
+/* an entity is an object with movement vectors and health. */
 typedef struct ENTITY
 {
   PAIR p, q; // object properties
@@ -19,11 +19,12 @@ typedef struct ENTITY
 
   PAIR v; // velocity vector
   PAIR a; // acceleration vector
+  unsigned char health;
 } ENTITY;
 
 ENTITY *ent_create (float px, float py, float szx, float szy, float vx,
                     float vy, float ax, float ay, SPRITE_ID sid,
-                    TILE_TYPE ttype, unsigned char flip);
+                    TILE_TYPE ttype, unsigned char flip, unsigned char health);
 
 void ent_destroy (ENTITY *ent);
 

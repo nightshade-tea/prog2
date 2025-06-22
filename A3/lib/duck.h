@@ -29,6 +29,8 @@
 #define DUCK_JMPSPD 25.0 / (FPS / 30.0)
 #define DUCK_GLIDESPD GRAV * 2.0
 
+#define DUCK_HEALTH 1
+
 ENTITY *duck_create ();
 
 void duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX],
