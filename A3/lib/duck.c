@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "bullets.h"
 #include "camera.h"
 #include "duck.h"
 #include "game.h"
@@ -13,6 +14,9 @@
 
 extern OBJECT platforms[];
 extern const size_t platforms_num;
+
+static unsigned char quack_timer = 0;
+static bool pending_quack = false;
 
 ENTITY *
 duck_create ()
@@ -152,6 +156,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
   float vx;
   float threshold;
   float inertia;
+  float quack_px, quack_py;
   bool on_ground;
   bool tunnel;
 
@@ -329,4 +334,31 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
     ent_collide (duck, &platforms[i]);
 
   ent_keep_inside_bounds (duck, cam);
+
+  if (quack_timer)
+    quack_timer = (quack_timer + 1) % DUCK_QUACK_RATE;
+
+  // quackity quack
+  if (duck->sid != SPRITE_DUCK_ROLL && duck->sid != SPRITE_DUCK_CROUCH
+      && duck->sid != SPRITE_DUCK_CRAWL
+      && ((key[ALLEGRO_KEY_ENTER] & KEY_SEEN) || pending_quack))
+    {
+      if (!quack_timer)
+        {
+          quack_py = duck->q.y - SPRITE_DUCK_QUACK_H;
+
+          if (!duck->flip)
+            quack_px = duck->q.x;
+          else
+            quack_px = duck->p.x - 8.0;
+
+          bullet_create (quack_px, quack_py, SPRITE_DUCK_QUACK, duck->flip,
+                         0.0);
+          pending_quack = false;
+          quack_timer = 1;
+        }
+
+      else
+        pending_quack = true;
+    }
 }

@@ -31,6 +31,8 @@
 
 #define DUCK_HEALTH 1
 
+#define DUCK_QUACK_RATE (int)(6 * (FPS / 30.0)) // roughly 2 quacks per sec
+
 ENTITY *duck_create ();
 
 void duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX],

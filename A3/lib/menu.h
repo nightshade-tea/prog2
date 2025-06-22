@@ -11,7 +11,7 @@
 #define MENU_SELECT_COLOR 117, 29, 29
 #define MENU_SHADOW_COLOR 74, 74, 74
 
-#define MENU_TITLE "pato"
+#define MENU_TITLE "pato contra minimagos antipáticos"
 #define MENU_TITLE_X MENU_CENTER_X
 #define MENU_TITLE_Y MENU_CENTER_Y - 50.0
 

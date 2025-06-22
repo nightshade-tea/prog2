@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 
+#include "bullets.h"
 #include "camera.h"
 #include "common.h"
 #include "duck.h"
@@ -64,6 +65,7 @@ start_game ()
 
   kbd_init (key);
   tiles_init ();
+  bullets_init ();
   ensure (cam = cam_create ());
   ensure (duck = duck_create ());
 
@@ -81,6 +83,8 @@ start_game ()
 
           sprites_update (sprites);
           duck_update (duck, key, sprites, cam);
+          bullets_update (cam);
+
           cam_move (cam, (duck->p.x + duck->q.x - RENDER_WIDTH) / 2);
           cam_update_time (cam);
 
@@ -128,6 +132,7 @@ start_game ()
         {
           cam_draw (cam);
           platforms_draw (cam, sprites);
+          bullets_draw (cam, sprites);
           obj_draw ((OBJECT *)duck, cam, sprites);
 
 #if DBG
@@ -146,6 +151,7 @@ start_game ()
     }
 
   tiles_destroy ();
+  bullets_destroy ();
   cam_destroy (cam);
   ent_destroy (duck);
 }

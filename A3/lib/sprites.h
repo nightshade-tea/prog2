@@ -5,7 +5,7 @@
 
 #include "game.h"
 
-#define SPRITES_UPDATE_RATE (int)(3 * (FPS / 30)) // roughly 10 FPS
+#define SPRITES_UPDATE_RATE (int)(3 * (FPS / 30.0)) // roughly 10 FPS
 
 #define SPRITE_DUCK_IDLE_PATH "assets/duck/idle.png"
 #define SPRITE_DUCK_IDLE_W 23
