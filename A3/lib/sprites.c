@@ -51,6 +51,11 @@ sprites_load ()
   init (DUCK_DEATH);
   init (DUCK_WALL_HIT);
 
+  init (DUCK_QUACK);
+  init (MAGE_IDLE);
+  init (MAGE_DEATH);
+  init (MAGE_BULLET);
+
   return sps;
 }
 
