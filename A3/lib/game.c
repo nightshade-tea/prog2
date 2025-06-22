@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "common.h"
 #include "duck.h"
+#include "enemies.h"
 #include "game.h"
 #include "keyboard.h"
 #include "platforms.h"
@@ -83,6 +84,7 @@ start_game ()
 
           sprites_update (sprites);
           duck_update (duck, key, sprites, cam);
+          enemies_update (duck);
           bullets_update (cam);
 
           cam_move (cam, (duck->p.x + duck->q.x - RENDER_WIDTH) / 2);
@@ -133,6 +135,7 @@ start_game ()
           cam_draw (cam);
           platforms_draw (cam, sprites);
           bullets_draw (cam, sprites);
+          enemies_draw (cam, sprites);
           obj_draw ((OBJECT *)duck, cam, sprites);
 
 #if DBG

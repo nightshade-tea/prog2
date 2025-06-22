@@ -1,5 +1,6 @@
 #include <allegro5/allegro_primitives.h>
 
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -48,8 +49,9 @@ obj_draw (OBJECT *obj, CAMERA *cam, SPRITES *sprites)
 #endif
 
   if (obj->sid != SPRITE_NODRAW)
-    al_draw_bitmap (sprites_get (sprites, obj->sid), obj->p.x - cam->offx,
-                    obj->p.y, obj->flip);
+    al_draw_bitmap (sprites_get (sprites, obj->sid),
+                    roundf (obj->p.x - cam->offx), roundf (obj->p.y),
+                    obj->flip);
   else if (obj->ttype != TILE_NODRAW)
     tile_draw (obj->ttype, obj->p.x - cam->offx, obj->p.y, obj->sz.x,
                obj->sz.y);

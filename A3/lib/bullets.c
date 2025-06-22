@@ -95,7 +95,6 @@ bullet_create (float px, float py, SPRITE_ID sid, unsigned char flip,
 void
 bullets_update (CAMERA *cam)
 {
-  float screen_x, screen_y;
   bool collision;
 
   for (size_t i = 0; i < BULLETS_MAX; i++)
@@ -104,16 +103,14 @@ bullets_update (CAMERA *cam)
         ent_update_velocity (bullets[i]);
         ent_update_position (bullets[i]);
 
-        screen_x = bullets[i]->p.x - cam->offx;
-        screen_y = bullets[i]->p.y;
-
-        if (screen_x < -0.5 * RENDER_WIDTH || screen_x > 1.5 * RENDER_WIDTH)
+        if ((bullets[i]->q.x - cam->offx) < 0.0
+            || (bullets[i]->p.x - cam->offx) > RENDER_WIDTH)
           {
             bullet_destroy (&bullets[i]);
             continue;
           }
 
-        if (screen_y < -0.5 * RENDER_HEIGHT || screen_y > 1.5 * RENDER_HEIGHT)
+        if ((bullets[i]->q.y) < 0.0 || (bullets[i]->p.y) > RENDER_HEIGHT)
           {
             bullet_destroy (&bullets[i]);
             continue;
