@@ -12,6 +12,7 @@
 #include "keyboard.h"
 #include "platforms.h"
 #include "sprites.h"
+#include "tiles.h"
 
 extern ALLEGRO_TIMER *timer;
 extern ALLEGRO_EVENT_QUEUE *queue;
@@ -62,6 +63,7 @@ start_game ()
   bool done = false;
 
   kbd_init (key);
+  tiles_init ();
   ensure (cam = cam_create ());
   ensure (duck = duck_create ());
 
@@ -126,6 +128,7 @@ start_game ()
         {
           cam_draw (cam);
           platforms_draw (cam, sprites);
+          tile_draw (TILE_GRASS, 50, 50, 160, 160);
           obj_draw ((OBJECT *)duck, cam, sprites);
 
 #if DBG
@@ -143,6 +146,7 @@ start_game ()
         }
     }
 
+  tiles_destroy ();
   cam_destroy (cam);
   ent_destroy (duck);
 }
