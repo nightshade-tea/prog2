@@ -9,6 +9,7 @@
 #include "object.h"
 #include "platforms.h"
 #include "sprites.h"
+#include "tiles.h"
 
 extern OBJECT platforms[];
 extern const size_t platforms_num;
@@ -17,7 +18,8 @@ ENTITY *
 duck_create ()
 {
   return ent_create (DUCK_DEFAULT_PX, DUCK_DEFAULT_PY, DUCK_DEFAULT_SZX,
-                     DUCK_DEFAULT_SZY, 0, 0, 0, GRAV, DUCK_DEFAULT_SPRITE, 0);
+                     DUCK_DEFAULT_SZY, 0, 0, 0, GRAV, DUCK_DEFAULT_SPRITE,
+                     TILE_NODRAW, 0);
 }
 
 #define handle_case(X)                                                        \

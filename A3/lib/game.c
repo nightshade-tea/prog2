@@ -128,7 +128,6 @@ start_game ()
         {
           cam_draw (cam);
           platforms_draw (cam, sprites);
-          tile_draw (TILE_GRASS, 50, 50, 160, 160);
           obj_draw ((OBJECT *)duck, cam, sprites);
 
 #if DBG

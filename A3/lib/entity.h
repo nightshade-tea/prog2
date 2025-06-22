@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "object.h"
 #include "sprites.h"
+#include "tiles.h"
 
 #define ENT_COLLISION_DELTA 1.0e-3
 
@@ -13,6 +14,7 @@ typedef struct ENTITY
   PAIR p, q; // object properties
   PAIR sz;   // ...
   SPRITE_ID sid;
+  TILE_TYPE ttype;
   unsigned char flip;
 
   PAIR v; // velocity vector
@@ -21,7 +23,7 @@ typedef struct ENTITY
 
 ENTITY *ent_create (float px, float py, float szx, float szy, float vx,
                     float vy, float ax, float ay, SPRITE_ID sid,
-                    unsigned char flip);
+                    TILE_TYPE ttype, unsigned char flip);
 
 void ent_destroy (ENTITY *ent);
 

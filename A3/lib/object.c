@@ -9,7 +9,7 @@
 
 OBJECT *
 obj_create (float px, float py, float szx, float szy, SPRITE_ID sid,
-            unsigned char flip)
+            TILE_TYPE ttype, unsigned char flip)
 {
   OBJECT *obj;
 
@@ -26,6 +26,7 @@ obj_create (float px, float py, float szx, float szy, SPRITE_ID sid,
   obj->q.y = obj->p.y + obj->sz.y;
 
   obj->sid = sid;
+  obj->ttype = ttype;
   obj->flip = flip;
 
   return obj;
@@ -46,9 +47,10 @@ obj_draw (OBJECT *obj, CAMERA *cam, SPRITES *sprites)
                      al_map_rgb (255, 0, 0), 1);
 #endif
 
-  if (obj->sid == SPRITE_NODRAW)
-    return;
-
-  al_draw_bitmap (sprites_get (sprites, obj->sid), obj->p.x - cam->offx,
-                  obj->p.y, obj->flip);
+  if (obj->sid != SPRITE_NODRAW)
+    al_draw_bitmap (sprites_get (sprites, obj->sid), obj->p.x - cam->offx,
+                    obj->p.y, obj->flip);
+  else if (obj->ttype != TILE_NODRAW)
+    tile_draw (obj->ttype, obj->p.x - cam->offx, obj->p.y, obj->sz.x,
+               obj->sz.y);
 }

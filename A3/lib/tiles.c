@@ -67,16 +67,17 @@ draw_grass (float x, float y, float w, float h)
 {
   SUBTILE_ID id;
   int cols, rows;
-  int col, row;
+  int col;
   float draw_x, draw_y;
   int variant;
+  float grass_offset;
   float dirt_y, dirt_h;
 
-  cols = (int)(w / SUBTILE_GRASS_W);
-  rows = (int)(h / SUBTILE_GRASS_H);
+  cols = (int)(w / SUBTILE_W);
+  rows = (int)(h / SUBTILE_H);
 
-  row = 0;
-  draw_y = y + row * SUBTILE_GRASS_H;
+  grass_offset = SUBTILE_GRASS_H - SUBTILE_H;
+  draw_y = y - grass_offset;
 
   for (col = 0; col < cols; col++)
     {
@@ -113,9 +114,8 @@ draw_grass (float x, float y, float w, float h)
 
   if (rows > 1)
     {
-      dirt_y = y + SUBTILE_GRASS_H;
+      dirt_y = y + SUBTILE_H;
       dirt_h = (rows - 1) * SUBTILE_DIRT_H;
-
       draw_dirt (x, dirt_y, w, dirt_h);
     }
 }
