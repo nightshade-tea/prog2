@@ -55,7 +55,21 @@ enemies_update (ENTITY *duck)
 
       if (e->health == 0)
         {
-          e->sid = SPRITE_MAGE_DEATH;
+          if (e->sid != SPRITE_MAGE_DEATH)
+            {
+              e->sid = SPRITE_MAGE_DEATH;
+
+              e->q.x += (SPRITE_MAGE_DEATH_W - e->sz.x) / 2.0;
+
+              e->sz.x = SPRITE_MAGE_DEATH_W;
+              e->sz.y = SPRITE_MAGE_DEATH_H;
+
+              e->p.x = e->q.x - e->sz.x;
+              e->p.y = e->q.y - e->sz.y;
+
+              e->flip = !e->flip;
+            }
+
           continue;
         }
 
@@ -77,23 +91,21 @@ enemies_update (ENTITY *duck)
       if (dist <= ENEMY_ATTACK_RADIUS && !shoot_timer[i])
         {
           if (e->flip == 0)
-            bx_center = e->q.x + ENT_COLLISION_DELTA;
+            bx = e->q.x + e->v.x;
 
           else
-            bx_center = e->p.x - ENT_COLLISION_DELTA;
+            bx = e->p.x + e->v.x - SPRITE_MAGE_BULLET_W;
 
-          by_center = e->p.y - (ENT_COLLISION_DELTA * 2.0);
+          by = (e->p.y + e->q.y - SPRITE_MAGE_BULLET_H) / 2.0;
 
-          bx = bx_center - (SPRITE_MAGE_BULLET_W / 2.0);
-          by = by_center - (SPRITE_MAGE_BULLET_H / 2.0);
+          bx_center = bx + (SPRITE_MAGE_BULLET_W * 0.5f);
+          by_center = by + (SPRITE_MAGE_BULLET_H * 0.5f);
 
-          // recompute direction from bullet firing point to duck
-          dx = duck_cx - bx_center;
-          dy = duck_cy - by_center;
-
-          angle = atan2f (-dy, fabsf (dx)) / (M_PI / 2.0f);
+          angle = atan2f (-(duck_cy - by_center), fabsf (duck_cx - bx_center))
+                  / (M_PI / 2.0f);
 
           bullet_create (bx, by, SPRITE_MAGE_BULLET, e->flip, angle);
+
           shoot_timer[i] = 1;
         }
     }
@@ -104,4 +116,11 @@ enemies_draw (CAMERA *cam, SPRITES *sprites)
 {
   for (size_t i = 0; i < enemies_num; i++)
     obj_draw ((OBJECT *)&enemies[i], cam, sprites);
+}
+
+void
+enemies_bullets_hit ()
+{
+  for (size_t i = 0; i < enemies_num; i++)
+    bullets_hit (&enemies[i]);
 }

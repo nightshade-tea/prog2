@@ -86,6 +86,8 @@ start_game ()
           duck_update (duck, key, sprites, cam);
           enemies_update (duck);
           bullets_update (cam);
+          enemies_bullets_hit ();
+          bullets_hit (duck);
 
           cam_move (cam, (duck->p.x + duck->q.x - RENDER_WIDTH) / 2);
           cam_update_time (cam);

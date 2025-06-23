@@ -176,6 +176,25 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
   else
     duck->a.x = inertia;
 
+  if (duck->health == 0)
+    {
+      if (duck->sid != SPRITE_DUCK_DEATH)
+        {
+          duck->sid = SPRITE_DUCK_DEATH;
+          update_geometry (duck);
+        }
+
+      ent_update_velocity (duck);
+      ent_update_position (duck);
+
+      for (size_t i = 0; i < platforms_num; i++)
+        ent_collide (duck, &platforms[i]);
+
+      ent_keep_inside_bounds (duck, cam);
+
+      return;
+    }
+
   // gliding
   if (duck->sid == SPRITE_DUCK_FALL && (duck->v.y >= DUCK_GLIDESPD)
       && (key[ALLEGRO_KEY_SPACE] & KEY_DOWN))

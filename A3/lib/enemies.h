@@ -14,4 +14,6 @@ void enemies_update (ENTITY *duck);
 
 void enemies_draw (CAMERA *cam, SPRITES *sprites);
 
+void enemies_bullets_hit ();
+
 #endif /* enemies.h */
