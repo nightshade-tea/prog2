@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 
 #include "bullets.h"
 #include "camera.h"
@@ -22,7 +23,7 @@ extern unsigned char end;
     .v = { 0.0f, 0.0f }, .a = { 0.0f, 0.0f }, .health = (hp)                  \
   }
 
-ENTITY enemies[] = {
+static const ENTITY enemies_template[] = {
   ENEMY (800.0, 324.0, ENEMY_HEALTH),
 
   ENEMY (1136.0, 298.0, ENEMY_HEALTH), ENEMY (1248.0, 266.0, ENEMY_HEALTH),
@@ -35,11 +36,21 @@ ENTITY enemies[] = {
 
 #undef ENEMY
 
+ENTITY enemies[sizeof enemies_template / sizeof *enemies_template];
+
 const size_t enemies_num = sizeof enemies / sizeof *enemies;
 
 static unsigned char shoot_timer[sizeof enemies / sizeof *enemies] = { 0 };
 
 size_t alive_enemies = enemies_num;
+
+void
+enemies_init ()
+{
+  memcpy (enemies, enemies_template, sizeof enemies_template);
+  memset (shoot_timer, 0, sizeof shoot_timer);
+  alive_enemies = enemies_num;
+}
 
 void
 enemies_update (ENTITY *duck)

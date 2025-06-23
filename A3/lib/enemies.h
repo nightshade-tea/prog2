@@ -10,6 +10,8 @@
 #define ENEMY_ATTACK_RATE (int)(24 * (FPS / 30.0))
 #define ENEMY_ATTACK_RADIUS (RENDER_WIDTH / 2.0) - (SPRITE_MAGE_IDLE_W * 2.0)
 
+void enemies_init ();
+
 void enemies_update (ENTITY *duck);
 
 void enemies_draw (CAMERA *cam, SPRITES *sprites);

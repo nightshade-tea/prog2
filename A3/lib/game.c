@@ -99,6 +99,7 @@ start_game ()
   paused = false;
   end = 0;
 
+  enemies_init ();
   kbd_init (key);
   tiles_init ();
   bullets_init ();
