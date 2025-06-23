@@ -21,7 +21,7 @@ extern ALLEGRO_EVENT_QUEUE *queue;
 extern ALLEGRO_DISPLAY *disp;
 extern ALLEGRO_FONT *font;
 extern SPRITES *sprites;
-extern size_t alive_enemies;
+extern ENTITY boss;
 
 static bool paused;
 unsigned char end; // 0 = playing, 1 = game over, 2 = success
@@ -134,7 +134,7 @@ start_game ()
           if (duck->sid == SPRITE_DUCK_DEATH)
             fail ();
 
-          else if (alive_enemies == 0)
+          else if (boss.health == 0)
             success ();
 
           redraw = true;
