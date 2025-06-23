@@ -28,7 +28,7 @@ ENTITY enemies[] = {
 
 const size_t enemies_num = sizeof enemies / sizeof *enemies;
 
-static unsigned char shoot_timer[enemies_num] = { 0 };
+static unsigned char shoot_timer[sizeof enemies / sizeof *enemies] = { 0 };
 
 void
 enemies_update (ENTITY *duck)
