@@ -11,6 +11,8 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+extern unsigned char end;
+
 #define ENEMY(qx, qy, hp)                                                     \
   (ENTITY)                                                                    \
   {                                                                           \
@@ -29,6 +31,8 @@ ENTITY enemies[] = {
 const size_t enemies_num = sizeof enemies / sizeof *enemies;
 
 static unsigned char shoot_timer[sizeof enemies / sizeof *enemies] = { 0 };
+
+size_t alive_enemies = enemies_num;
 
 void
 enemies_update (ENTITY *duck)
@@ -88,7 +92,7 @@ enemies_update (ENTITY *duck)
       dy = duck_cy - enemy_cy;
       dist = hypotf (dx, dy);
 
-      if (dist <= ENEMY_ATTACK_RADIUS && !shoot_timer[i])
+      if (dist <= ENEMY_ATTACK_RADIUS && !shoot_timer[i] && !end)
         {
           if (e->flip == 0)
             bx = e->q.x + e->v.x;
@@ -121,6 +125,15 @@ enemies_draw (CAMERA *cam, SPRITES *sprites)
 void
 enemies_bullets_hit ()
 {
+  unsigned char old_health;
+
   for (size_t i = 0; i < enemies_num; i++)
-    bullets_hit (&enemies[i]);
+    {
+      old_health = enemies[i].health;
+
+      bullets_hit (&enemies[i]);
+
+      if (enemies[i].health == 0 && old_health != 0)
+        alive_enemies--;
+    }
 }

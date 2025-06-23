@@ -69,7 +69,7 @@ main ()
   init_display ();
   init_queue ();
 
-  if (start_menu ())
+  while (start_menu ())
     start_game ();
 
   sprites_destroy (sprites);

@@ -21,8 +21,22 @@ extern ALLEGRO_EVENT_QUEUE *queue;
 extern ALLEGRO_DISPLAY *disp;
 extern ALLEGRO_FONT *font;
 extern SPRITES *sprites;
+extern size_t alive_enemies;
 
-static bool paused = false;
+static bool paused;
+unsigned char end; // 0 = playing, 1 = game over, 2 = success
+
+static void
+success ()
+{
+  end = 2;
+}
+
+static void
+fail ()
+{
+  end = 1;
+}
 
 static void
 pause_game ()
@@ -54,6 +68,24 @@ pause_menu ()
   pause_write (PAUSE_MSG, PAUSE_MSG_X, PAUSE_MSG_Y, ALLEGRO_ALIGN_CENTRE);
 }
 
+static void
+fail_menu ()
+{
+  al_draw_filled_rectangle (0, 0, RENDER_WIDTH, RENDER_HEIGHT,
+                            al_map_rgba (PAUSE_DIM_COLOR));
+
+  pause_write (GAME_OVER_MSG, PAUSE_MSG_X, PAUSE_MSG_Y, ALLEGRO_ALIGN_CENTRE);
+}
+
+static void
+success_menu ()
+{
+  al_draw_filled_rectangle (0, 0, RENDER_WIDTH, RENDER_HEIGHT,
+                            al_map_rgba (PAUSE_DIM_COLOR));
+
+  pause_write (SUCCESS_MSG, PAUSE_MSG_X, PAUSE_MSG_Y, ALLEGRO_ALIGN_CENTRE);
+}
+
 void
 start_game ()
 {
@@ -63,6 +95,9 @@ start_game ()
   ENTITY *duck;
   bool redraw = true;
   bool done = false;
+
+  paused = false;
+  end = 0;
 
   kbd_init (key);
   tiles_init ();
@@ -95,6 +130,12 @@ start_game ()
           kbd_reset_seen (key);
           cam->offx += 1 / (FPS / 30);
 
+          if (duck->sid == SPRITE_DUCK_DEATH)
+            fail ();
+
+          else if (alive_enemies == 0)
+            success ();
+
           redraw = true;
           break;
 
@@ -103,6 +144,12 @@ start_game ()
 
           if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
             {
+              if (end)
+                {
+                  done = true;
+                  continue;
+                }
+
               if (!paused)
                 pause_game ();
 
@@ -112,7 +159,7 @@ start_game ()
               redraw = true;
             }
 
-          if (event.keyboard.keycode == ALLEGRO_KEY_Q && paused)
+          if (event.keyboard.keycode == ALLEGRO_KEY_Q && (paused || end))
             {
               done = true;
               continue;
@@ -149,6 +196,12 @@ start_game ()
 
           if (paused)
             pause_menu ();
+
+          if (end == 1)
+            fail_menu ();
+
+          if (end == 2)
+            success_menu ();
 
           al_flip_display ();
           redraw = false;

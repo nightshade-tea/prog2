@@ -17,6 +17,10 @@
 #define PAUSE_MSG_FOREGROUND_COLOR 221, 221, 221
 #define PAUSE_MSG_SHADOW_COLOR 74, 74, 74
 
+#define GAME_OVER_MSG "vitória dos minimagos. pobre pato coitado..."
+
+#define SUCCESS_MSG "vitória do pato sapato!"
+
 void start_game ();
 
 #endif /* game.h */
