@@ -6,7 +6,7 @@
 #include "entity.h"
 #include "sprites.h"
 
-#define ENEMY_HEALTH 3
+#define ENEMY_HEALTH 2
 #define ENEMY_ATTACK_RATE (int)(24 * (FPS / 30.0))
 #define ENEMY_ATTACK_RADIUS (RENDER_WIDTH / 2.0) - (SPRITE_MAGE_IDLE_W * 2.0)
 

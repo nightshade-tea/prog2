@@ -11,7 +11,7 @@
 #define CAM_LAYER_HEIGHT 324
 
 #define CAM_BEGIN 0.0
-#define CAM_END CAM_LAYER_WIDTH * 2.0
+#define CAM_END CAM_LAYER_WIDTH * 10.0
 
 #define CAM_SPD 0.8
 #define CAM_TIME_INC 1.0 / (FPS / 30.0)
