@@ -36,7 +36,7 @@ static const ENTITY enemies_template[] = {
 
 #undef ENEMY
 
-ENTITY boss
+static const ENTITY boss_template
     = { .p = { 3000.0 - SPRITE_MAGE_IDLE_W, 324.0 - SPRITE_MAGE_IDLE_H },
         .q = { 3000.0, 324.0 },
         .sz = { SPRITE_MAGE_IDLE_W, SPRITE_MAGE_IDLE_H },
@@ -46,6 +46,8 @@ ENTITY boss
         .v = { 0.0, 0.0 },
         .a = { 0.0, 0.0 },
         .health = BOSS_HEALTH };
+
+ENTITY boss;
 
 static unsigned char boss_shoot_timer = 0;
 
@@ -61,9 +63,7 @@ enemies_init ()
   memcpy (enemies, enemies_template, sizeof enemies_template);
   memset (shoot_timer, 0, sizeof shoot_timer);
 
-  boss.health = BOSS_HEALTH;
-  boss.sid = SPRITE_MAGE_IDLE;
-  boss.flip = 1;
+  memcpy (&boss, &boss_template, sizeof boss);
   boss_shoot_timer = 0;
 }
 
