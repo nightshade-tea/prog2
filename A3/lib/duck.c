@@ -184,6 +184,7 @@ duck_update (ENTITY *duck, KEYBOARD key[ALLEGRO_KEY_MAX], SPRITES *sprites,
           update_geometry (duck);
         }
 
+      duck->a.y = GRAV;
       ent_update_velocity (duck);
       ent_update_position (duck);
 
