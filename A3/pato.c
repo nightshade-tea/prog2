@@ -35,7 +35,7 @@ init_display ()
   float scalex, scaley;
 
   al_set_new_display_flags (ALLEGRO_FULLSCREEN_WINDOW);
-  al_set_new_display_option (ALLEGRO_VSYNC, 1, ALLEGRO_REQUIRE);
+  al_set_new_display_option (ALLEGRO_VSYNC, 1, ALLEGRO_SUGGEST);
   ensure (disp = al_create_display (RENDER_WIDTH, RENDER_HEIGHT));
 
   scalex = ((float)al_get_display_width (disp)) / RENDER_WIDTH;
