@@ -149,7 +149,7 @@ bullets_hit (ENTITY *ent)
         && ent_collides (ent, (OBJECT *)bullets[i], ENT_COLLISION_DELTA))
       {
         switch (ent->sid)
-        {
+          {
           case SPRITE_DUCK_CRAWL:
           case SPRITE_DUCK_CROUCH:
 
@@ -181,6 +181,6 @@ bullets_hit (ENTITY *ent)
             bullet_destroy (&bullets[i]);
 
             break;
-        }
+          }
       }
 }
