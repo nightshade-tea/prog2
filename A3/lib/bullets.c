@@ -148,9 +148,39 @@ bullets_hit (ENTITY *ent)
     if (bullets[i]
         && ent_collides (ent, (OBJECT *)bullets[i], ENT_COLLISION_DELTA))
       {
-        if (ent->health)
-          ent->health--;
+        switch (ent->sid)
+        {
+          case SPRITE_DUCK_CRAWL:
+          case SPRITE_DUCK_CROUCH:
 
-        bullet_destroy (&bullets[i]);
+            bullets[i]->v.x *= -1.0;
+            bullets[i]->v.y *= -1.0;
+            bullets[i]->a.x *= -1.0;
+            bullets[i]->a.y *= -1.0;
+
+            if (bullets[i]->v.x > 0)
+              {
+                bullets[i]->p.x += ent->sz.x * 0.5;
+                bullets[i]->q.x += ent->sz.x * 0.5;
+              }
+
+            else
+              {
+                bullets[i]->p.x -= ent->sz.x * 0.5;
+                bullets[i]->q.x -= ent->sz.x * 0.5;
+              }
+
+            bullets[i]->flip = !bullets[i]->flip;
+
+            break;
+
+          default:
+            if (ent->health)
+              ent->health--;
+
+            bullet_destroy (&bullets[i]);
+
+            break;
+        }
       }
 }
